@@ -55,12 +55,27 @@ class SQLiteJDBC(DbPath: Path) {
     /**
      * 更改
      * 将目标表[table]内的所有记录中字段[column]的值等于[value]的记录的字段[key]的值更改为[data]
-     */
+     *
+     * UPDATE $table SET $Array.key = $Array.data WHERE $column = $value;
+     **/
     fun update(table: String, column: String, value: String, key: Array<String>, data: Array<String>) {
-        val sql = "UPDATE $table set " +
-                "${key.joinToString(",", "(", ")")} = " +
-                "${data.joinToString(",", "(", ")")} where " +
-                "$column = $value;"
+        val sql = "UPDATE $table SET " +
+            "${key.joinToString(",", "(", ")")} = " +
+            "${data.joinToString(",", "(", ")")} WHERE " +
+            "$column = $value;"
+        if (executeSQL(sql) < 0) {
+            PluginMain.logger.warning { "执行SQL异常" }
+        }
+    }
+
+    /**
+     * 更改
+     * 将目标表[table]内的所有记录中字段[column]的值等于[value]的记录的字段[key]的值更改为[data]
+     *
+     * UPDATE $table SET $key = $data WHERE $column = $value;
+     **/
+    fun update(table: String, column: String, value: Any, key: String, data: Any) {
+        val sql = "UPDATE $table SET $key = $data WHERE $column = $value;"
         if (executeSQL(sql) < 0) {
             PluginMain.logger.warning { "执行SQL异常" }
         }
@@ -71,7 +86,7 @@ class SQLiteJDBC(DbPath: Path) {
      * 删除目标表[table]内所有记录中字段[column]的值等于[value]的记录
      */
     fun delete(table: String, column: String, value: String) {
-        val sql = "DELETE from $table where $column = $value;"
+        val sql = "DELETE FROM $table WHERE $column = $value;"
         if (executeSQL(sql) < 0) {
             PluginMain.logger.warning { "执行SQL异常" }
         }
@@ -97,12 +112,12 @@ class SQLiteJDBC(DbPath: Path) {
         val resultList: MutableList<MutableMap<String?, Any?>> = ArrayList()
 
         val sql: String = when (mods) {
-            1 -> "SELECT * FROM $table where $column = $value;"
-            2 -> "SELECT * FROM $table where $column GLOB '*$value';"
-            3 -> "SELECT * FROM $table where $column GLOB '$value*';"
-            4 -> "SELECT * FROM $table where $column GLOB '*$value*';"
-            5 -> "SELECT * FROM $table where $column != $value;"
-            else -> "SELECT * FROM $table where $column = '$value';"
+            1 -> "SELECT * FROM $table WHERE $column = $value;"
+            2 -> "SELECT * FROM $table WHERE $column GLOB '*$value';"
+            3 -> "SELECT * FROM $table WHERE $column GLOB '$value*';"
+            4 -> "SELECT * FROM $table WHERE $column GLOB '*$value*';"
+            5 -> "SELECT * FROM $table WHERE $column != $value;"
+            else -> "SELECT * FROM $table WHERE $column = '$value';"
         }
         try {
             stmt = c?.createStatement()
@@ -156,7 +171,7 @@ class SQLiteJDBC(DbPath: Path) {
             4 -> column.forEach { determiner.add("$it GLOB '*${valueIterator.next()}*'") }
             else -> column.forEach { determiner.add("$it = ${valueIterator.next()}") }
         }
-        val sql = "SELECT * FROM $table where ${determiner.joinToString(" $conjunction ")};"
+        val sql = "SELECT * FROM $table WHERE ${determiner.joinToString(" $conjunction ")};"
         try {
             stmt = c?.createStatement()
             val rs: ResultSet? = stmt?.executeQuery(sql)

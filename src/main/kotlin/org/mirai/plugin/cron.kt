@@ -6,29 +6,24 @@ import net.mamoe.mirai.utils.info
 import java.time.LocalDateTime
 
 data class MyTime(var hours: Int, var minute: Int) {
-    fun getNextInteger(flag: MyTime): Long {
-        return if (flag.hours == 0) ((minute / 10 + 1) * 10 - minute) * 60_000L else (60 - minute) * 60_000L
-//        return if (minute/10*10>=60)((10-minute % 10)*60_000L) else
+    fun getNextInteger(starting: MyTime, anyDay: Boolean = false): Long {
+        return if (anyDay) {
+            val h = starting.hours - hours
+            val m = starting.minute - minute
+            val final = when {
+                h < 0 -> (24 + h) * 60 + m
+                h == 0 -> if (m < 0) 24 * 60 + m else m
+                else -> h * 60 + m
+            }
+            final * 60_000L
+        } else {
+            if (starting.hours == 0) ((minute / 10 + 1) * 10 - minute) * 60_000L else (60 - minute) * 60_000L
+        }
     }
 
     fun getSleepStamp(): Long {
         return (hours * 60 + minute) * 60_000L
     }
-//        return if (minute % 10 >0){
-//            if(minute + 10 - minute % 10<=60){
-//                10 - minute % 10
-//                minute = min-60
-//                hours++
-//                if(hours>=24){
-//                    hours = 0
-//                }
-//        }else{
-//            0
-//        }
-//
-//    }else{
-//    0
-//    }
 }
 
 class CronJob(explain: String) {
@@ -59,6 +54,37 @@ class CronJob(explain: String) {
                     LocalDateTime.now().hour,
                     LocalDateTime.now().minute
                 ).getNextInteger(period)
+                PluginMain.logger.info { "$jobExplain 到下次执行睡眠$nextTime" }
+                delay(nextTime)
+            } else {
+                delay(period.getSleepStamp())
+                calibrationCountdown++      // 计数增加
+            }
+        }
+    }
+
+    @ConsoleExperimentalApi
+    suspend fun start(period: MyTime, starting: MyTime) {
+        val startTime = MyTime(
+            LocalDateTime.now().hour,
+            LocalDateTime.now().minute
+        ).getNextInteger(starting, true)
+        PluginMain.logger.info { "$jobExplain start sleep: $startTime ms" }
+        flag = true
+        delay(startTime)
+        while (flag) {
+            PluginMain.logger.info { "执行作业：$jobExplain" }
+            for (job in jobList) {
+                job()
+            }
+            PluginMain.logger.info { "$jobExplain 执行完毕" }
+            if (calibrationCountdown >= 120) {
+                PluginMain.logger.info { "$jobExplain 执行校准" }
+                calibrationCountdown = 0
+                val nextTime = MyTime(
+                    LocalDateTime.now().hour,
+                    LocalDateTime.now().minute
+                ).getNextInteger(starting, true)
                 PluginMain.logger.info { "$jobExplain 到下次执行睡眠$nextTime" }
                 delay(nextTime)
             } else {
