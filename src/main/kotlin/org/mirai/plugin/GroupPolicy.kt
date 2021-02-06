@@ -105,7 +105,7 @@ object GroupPolicy : CompositeCommand(
             }
             1, 2, 3 -> {
                 dbObject.update("Policy", "group_id", group.id, "DailyReminderMode", mode)
-                sendMessage("报时设定到模式$mode")
+                sendMessage("每日提醒设定到模式$mode")
             }
             else -> {
                 dailyReminder()

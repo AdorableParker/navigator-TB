@@ -62,7 +62,7 @@ object SendDynamic : CompositeCommand(
             return
         }
         val (timeStamp, text, images) = getDynamic(233114659, index)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
 //        if (images?.isEmpty() == true){
 //            val f = images[0].toExternalResource()
 //            val chain = buildMessageChain{
@@ -84,7 +84,7 @@ object SendDynamic : CompositeCommand(
     @SubCommand("阿米娅", "方舟公告", "罗德岛线报", "2")
     suspend fun MemberCommandSenderOnMessage.arKnights() {
         val (timeStamp, text, images) = getDynamic(161775300)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -99,7 +99,7 @@ object SendDynamic : CompositeCommand(
             return
         }
         val (timeStamp, text, images) = getDynamic(161775300, index)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -107,7 +107,7 @@ object SendDynamic : CompositeCommand(
     @SubCommand("呆毛王", "FGO公告", "月球人公告", "3")
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder() {
         val (timeStamp, text, images) = getDynamic(233108841)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -122,7 +122,7 @@ object SendDynamic : CompositeCommand(
             return
         }
         val (timeStamp, text, images) = getDynamic(233108841, index)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -130,7 +130,7 @@ object SendDynamic : CompositeCommand(
     @SubCommand("派蒙", "原神公告", "冒险家情报", "4")
     suspend fun MemberCommandSenderOnMessage.genShin() {
         val (timeStamp, text, images) = getDynamic(401742377)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -145,7 +145,7 @@ object SendDynamic : CompositeCommand(
             return
         }
         val (timeStamp, text, images) = getDynamic(401742377, index)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -153,7 +153,7 @@ object SendDynamic : CompositeCommand(
     @SubCommand("UID", "其他", "5")
     suspend fun MemberCommandSenderOnMessage.other(uid: Int) {
         val (timeStamp, text, images) = getDynamic(uid)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
@@ -168,7 +168,7 @@ object SendDynamic : CompositeCommand(
             return
         }
         val (timeStamp, text, images) = getDynamic(uid, index)
-        val time = SimpleDateFormat("YY-MM-DD hh:mm").format(timeStamp)
+        val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
         images?.let { subject.sendImage(it) }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }

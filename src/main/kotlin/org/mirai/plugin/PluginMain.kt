@@ -112,38 +112,42 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupList = dbObject.select("Policy", "DailyReminderMode", 0, 5)
                 dbObject.closeDB()
+                val script = mapOf(
+                    1 to arrayListOf(
+                        "Ciallo～(∠・ω< )⌒★今天是周一哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周二哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周三哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周四哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周五哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周六哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周日哦,每日全部模式开放，每周两次的破交作战记得打哦，困难模式也别忘了。"
+                    ),
+                    2 to arrayListOf(
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周一, 今天周回本开放「弓阶修炼场」,「收集火种(枪杀)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周二, 今天周回本开放「枪阶修炼场」,「收集火种(剑骑)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周三, 今天周回本开放「狂阶修炼场」,「收集火种(弓术)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周四, 今天周回本开放「骑阶修炼场」,「收集火种(枪杀)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周五, 今天周回本开放「术阶修炼场」,「收集火种(剑骑)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周六, 今天周回本开放「杀阶修炼场」,「收集火种(弓术)」。",
+                        "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周日, 今天周回本开放「剑阶修炼场」,「收集火种(All)」。"
+                    )
+                )
                 for (groupPolicy in groupList) {
                     val groupID = groupPolicy["group_id"] as Int
                     val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
-                    val script = when (groupPolicy["TellTimeMode"]) {
-                        1 -> arrayListOf(
-                            "Ciallo～(∠・ω< )⌒★今天是周一哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周二哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周三哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周四哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周五哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周六哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
-                            "Ciallo～(∠・ω< )⌒★今天是周日哦,每日全部模式开放，每周两次的破交作战记得打哦，困难模式也别忘了。"
-                        )
-                        2 -> arrayListOf(
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周一, 今天周回本开放「弓阶修炼场」,「收集火种(枪杀)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周二, 今天周回本开放「枪阶修炼场」,「收集火种(剑骑)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周三, 今天周回本开放「狂阶修炼场」,「收集火种(弓术)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周四, 今天周回本开放「骑阶修炼场」,「收集火种(枪杀)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周五, 今天周回本开放「术阶修炼场」,「收集火种(剑骑)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周六, 今天周回本开放「杀阶修炼场」,「收集火种(弓术)」。",
-                            "Ciallo～(∠・ω< )⌒★晚上好,Master,今天是周日, 今天周回本开放「剑阶修炼场」,「收集火种(All)」。"
-                        )
-                        else -> {
-                            PluginMain.logger.warning { "未知的模式" }
-                            null
+                    when (groupPolicy["DailyReminderMode"]) {
+                        1 -> script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
+                        2 -> script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
+                        3 -> {
+                            script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
+                            script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
                         }
+                        else -> PluginMain.logger.warning { "未知的模式" }
                     }
-                    script?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
                 }
-                // Todo： 等待测试
             }
             job3.start(MyTime(24, 0), MyTime(9, 0))
+//            job3.start(MyTime(0, 3))
         }
     }
 
