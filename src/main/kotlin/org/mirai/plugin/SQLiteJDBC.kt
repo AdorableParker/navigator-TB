@@ -145,14 +145,15 @@ class SQLiteJDBC(DbPath: Path) {
 
     /**
      * 读取并返回目标表[table]内的所有记录中字段[column]
+     * 等于或包含[value]的所有数据
+     *
      * 多个条件之间使用连接词[conjunction]连接
-     * 等于或包含[value]的所有数据 (不需要额外引号)
      * [mods]参数决定匹配模式
-     * 0 -> 全等字符串
-     * 1 -> 不做处理
-     * 2 -> 尾部为value的字符串
-     * 3 -> 头部为value的字符串
-     * 4 -> 包含有value的字符串
+     * @param [table] 目标表名
+     * @param [column] 限制字段
+     * @param [value] 限制值(不需要额外引号)
+     * @param [conjunction] 连接词
+     * @param [mods] 匹配模式(0:全等字符串,1:不做处理,2:尾部为value的字符串,3:头部为value的字符串,4:包含有value的字符串)
      */
     fun select(
         table: String,  // 目标表名

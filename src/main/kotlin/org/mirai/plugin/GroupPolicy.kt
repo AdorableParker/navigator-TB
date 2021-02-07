@@ -1,6 +1,6 @@
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.commandPrefix
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -11,7 +11,7 @@ object GroupPolicy : CompositeCommand(
     description = "群功能个性化配置"
 ) {
     override val usage: String = """
-        $commandPrefix $primaryName <目标ID> [设定值]
+        ${CommandManager.commandPrefix}群策略 <目标ID> [设定值]
         目标ID列表：
         *1* 报时模式
         *2* 订阅模式

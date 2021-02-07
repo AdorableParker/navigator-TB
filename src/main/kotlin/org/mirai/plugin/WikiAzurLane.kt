@@ -1,6 +1,6 @@
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.commandPrefix
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -16,7 +16,7 @@ object WikiAzurLane : CompositeCommand(
     description = "碧蓝几大基本榜单查询"
 ) {
     override val usage: String =
-        "$commandPrefix $primaryName <榜单ID>\n" +
+        "${CommandManager.commandPrefix}碧蓝wiki <榜单ID>\n" +
             "榜单ID列表：\n" +
             "*1* 强度榜,强度主榜\n" +
             "*2* 强度副榜\n" +

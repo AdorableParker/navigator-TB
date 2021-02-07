@@ -21,6 +21,7 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 
+
 data class Dynamic(val timestamp: Long?, val text: String?, val imageURL: InputStream?)
 
 @ConsoleExperimentalApi
@@ -38,6 +39,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         SendDynamic.register()
         GroupPolicy.register()
         Roster.register()
+        Calculator.register()
         Test.register()
         // 动态更新
         GlobalScope.launch {
@@ -100,11 +102,6 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
             job2.start(MyTime(1, 0))
         }
-
-        """
-
-
-        """.trimIndent()
         // 每日提醒
         GlobalScope.launch {
             val job3 = CronJob("每日提醒")
@@ -146,7 +143,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                     }
                 }
             }
-            job3.start(MyTime(24, 0), MyTime(9, 0))
+            job3.start(MyTime(24, 0), MyTime(21, 0))
 //            job3.start(MyTime(0, 3))
         }
     }
@@ -160,6 +157,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         GroupPolicy.unregister()
         Test.unregister()
         Roster.unregister()
+        Calculator.unregister()
         GlobalScope.cancel()
     }
 }

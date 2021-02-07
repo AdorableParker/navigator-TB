@@ -2,7 +2,7 @@ package org.mirai.plugin
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.commandPrefix
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -17,7 +17,7 @@ object SendDynamic : CompositeCommand(
     description = "B站动态查询"
 ) {
     override val usage: String =
-        "$commandPrefix $primaryName <目标ID> [回溯条数]\n" +
+        "${CommandManager.commandPrefix}动态查询 <目标ID> [回溯条数]\n" +
             "目标ID列表：\n" +
             "*1* 小加加,火星加,碧蓝公告\n" +
             "*2* 阿米娅,方舟公告,罗德岛线报\n" +

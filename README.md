@@ -13,7 +13,7 @@
 * [X] 整点报时 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 游戏每日提醒 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 船名查询 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
-* [ ] 计算器 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
+* [X] 计算器 ![`未测试`](https://img.shields.io/badge/-NotTested-red)
 * [ ] 智障聊天 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
 * [ ] 自助禁言 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
 * [ ] 随机色图 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)

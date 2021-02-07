@@ -1,6 +1,6 @@
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.commandPrefix
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -10,7 +10,7 @@ object ShipMap : SimpleCommand(
     PluginMain, "ShipMap", "打捞定位",
     description = "碧蓝航线舰船打捞定位"
 ) {
-    override val usage = "${commandPrefix}打捞定位 <船名|地图坐标>"
+    override val usage = "${CommandManager.commandPrefix}打捞定位 <船名|地图坐标>"
     private val dataDir = PluginMain.resolveDataPath("AssetData.db")
 
     @Handler
