@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/2/8 上午8:03
+ */
+
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.commandPrefix
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -10,7 +16,7 @@ object Construction : SimpleCommand(
     PluginMain, "Construction", "建造时间",
     description = "碧蓝航线建造时间查询"
 ) {
-    override val usage: String = "${commandPrefix}建造时间 <时间|船名>"
+    override val usage: String = "${CommandManager.commandPrefix}建造时间 <时间|船名>"
     private val dataDir = PluginMain.resolveDataPath("AssetData.db")
 
     @Handler
