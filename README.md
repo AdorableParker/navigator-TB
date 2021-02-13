@@ -13,9 +13,9 @@
 * [X] 整点报时 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 游戏每日提醒 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 船名查询 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
-* [X] 计算器 ![`未测试`](https://img.shields.io/badge/-NotTested-red)
-* [ ] 智障聊天 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
-* [ ] 自助禁言 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
+* [X] 计算器 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
+* [X] 自助禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
+* [ ] 智障聊天 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
 * [ ] 随机色图 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
 * [ ] 碧蓝航线的活动计算器 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
 * [ ] 基于`SauceNao`的搜图 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
@@ -23,8 +23,9 @@
 * [X] ~~成语接龙~~ ![`不会实现`](https://img.shields.io/badge/-Invalid-inactive)
 
 ## 计划在本项目中实现的功能
+
 * [X] 整点报时 - 舰C语音版本 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
-* [ ] 众裁禁言 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
+* [X] 众裁禁言 ![`未测试`](https://img.shields.io/badge/-NotTested-red)
 * [ ] 塔罗占卜 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
 
 |**说明**|**图标**|

@@ -1,6 +1,13 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/2/14 上午3:11
+ */
+
 package org.mirai.plugin
 
-import kotlinx.coroutines.GlobalScope
+import com.mayabot.nlp.module.summary.KeywordSummary
+import com.mayabot.nlp.segment.Lexers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
@@ -26,8 +33,17 @@ data class Dynamic(val timestamp: Long?, val text: String?, val imageURL: InputS
 
 @ConsoleExperimentalApi
 object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
+    val LEXER = Lexers.coreBuilder()
+//            .withPos() //词性标注功能
+        .withPersonName() // 人名识别功能
+        .withNer() // 命名实体识别
+        .build()
+    val KEYWORD_SUMMARY = KeywordSummary()
+
+    val VOTELIST: MutableMap<Long, VoteUser> = mutableMapOf()
+
     override fun onEnable() {
-        MySetting.reload() // 从数据库自动读取配置实例
+        MySetting.reload() // 从数据库自动读
         MyPluginData.reload()
         logger.info { "Hi: ${MySetting.name}" } // 输出一条日志.
 
@@ -40,9 +56,11 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         GroupPolicy.register()
         Roster.register()
         Calculator.register()
+        AutoBanned.register()
+        CrowdVerdict.register()
         Test.register()
         // 动态更新
-        GlobalScope.launch {
+        PluginMain.launch {
             val job1 = CronJob("动态更新")
             job1.addJob {
                 for (list in MyPluginData.timeStampOfDynamic) {
@@ -68,7 +86,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             job1.start(MyTime(0, 6))
         }
         // 报时
-        GlobalScope.launch {
+        PluginMain.launch {
             val job2 = CronJob("报时")
             job2.addJob {
                 val time = LocalDateTime.now().hour
@@ -103,7 +121,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             job2.start(MyTime(1, 0))
         }
         // 每日提醒
-        GlobalScope.launch {
+        PluginMain.launch {
             val job3 = CronJob("每日提醒")
             job3.addJob {
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
@@ -158,14 +176,16 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Test.unregister()
         Roster.unregister()
         Calculator.unregister()
-        GlobalScope.cancel()
+        AutoBanned.unregister()
+        CrowdVerdict.unregister()
+        PluginMain.cancel()
     }
 }
 
 // 定义插件数据
 // 插件
 object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文件名 (不带后缀)
-    var timeStampOfDynamic: MutableMap<Int, Long> by value(
+    val timeStampOfDynamic: MutableMap<Int, Long> by value(
         mutableMapOf(
             233114659 to 1L,
             161775300 to 1L,
@@ -173,7 +193,7 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
             401742377 to 1L
         )
     )
-    var nameOfDynamic: MutableMap<Int, String> by value(
+    val nameOfDynamic: MutableMap<Int, String> by value(
         mutableMapOf(
             233114659 to "AzurLane",
             161775300 to "ArKnights",

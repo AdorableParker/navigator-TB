@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/2/14 上午3:11
+ */
+
 package org.mirai.plugin
 
 import net.mamoe.mirai.console.command.CommandManager
@@ -42,37 +48,52 @@ object Calculator : SimpleCommand(
         val stack = Stack<Char>()
         val stackRPN = Stack<BigDecimal>()
         val list: MutableList<Char> = ArrayList()
+        var flag = true
         for (i in rpn.indices) {
             when {
                 (rpn[i].toString()).matches(Regex("""[\d.]""")) -> list.add(rpn[i])
-                rpn[i] == '(' -> stack.push(rpn[i])
+                rpn[i] == '(' -> if (list.isEmpty()) stack.push(rpn[i]) else return "错误,意外的运算符 '('"
                 rpn[i] == ')' -> {
-                    while ('(' != stack.lastElement()) {
-                        list.add(stack.pop())
+                    charToNum(list)?.let { stackRPN.push(it) } ?: let { return "错误,'${list.joinToString("")}'不是有效的数字" }
+                    list.clear()
+
+                    while (stack.isNotEmpty() && '(' != stack.lastElement()) {
+                        val sign = stack.pop()
+                        operation(stackRPN.pop(), stackRPN.pop(), sign)?.let { stackRPN.push(it) }
+                            ?: let { return "错误,意外的运算符 '$sign',预期得到'+', '-', '*', '/', '%', '(', ')'" }
                     }
+                    if (stack.isEmpty()) return "错误,意外的运算符 ')'"
                     stack.pop()
+                    flag = false
                 }
                 (rpn[i].toString()).matches(Regex("""[+\-*/%π]""")) -> {
                     if (list.isEmpty()) {
-                        when (rpn[i]) {
-                            '-' -> {
-                                stackRPN.push(BigDecimal(-1.0));stack.push('*')
+                        when {
+                            rpn[i] == 'π' -> {
+                                stackRPN.push(BigDecimal(PI));continue
                             }
-                            'π' -> stackRPN.push(BigDecimal(PI))
+                            rpn[i] == '-' && flag -> {
+                                stackRPN.push(BigDecimal(-1.0));stack.push('*')
+                                continue
+                            }
+                            rpn[i] == '-' && !flag -> flag = true
+                            else -> {
+                                stack.push(rpn[i]);continue
+                            }
                         }
-                        continue
+                    } else {
+                        charToNum(list)?.let { stackRPN.push(it) }
+                            ?: let { return "错误,'${list.joinToString("")}'不是有效的数字" }
+                        list.clear()
+                        if (rpn[i] == 'π') {
+                            stackRPN.push(operation(BigDecimal(3.14159), stackRPN.pop(), '*'))
+                            continue
+                        }
+                        if (stack.isEmpty()) {
+                            stack.push(rpn[i])
+                            continue
+                        }
                     }
-                    charToNum(list)?.let { stackRPN.push(it) } ?: let { return "错误,'${list.joinToString("")}'不是有效的数字" }
-                    list.clear()
-                    if (rpn[i] == 'π') {
-                        stackRPN.push(operation(BigDecimal(3.14159), stackRPN.pop(), '*'))
-                        continue
-                    }
-                    if (stack.isEmpty()) {
-                        stack.push(rpn[i])
-                        continue
-                    }
-
                     while (!stack.isEmpty() &&
                         stack.lastElement() != '(' &&
                         !comparePriority(rpn[i], stack.lastElement())
@@ -94,6 +115,6 @@ object Calculator : SimpleCommand(
             operation(stackRPN.pop(), stackRPN.pop(), sign)?.let { stackRPN.push(it) }
                 ?: let { return "错误,意外的运算符 '$sign',预期得到'+', '-', '*', '/', '%', '(', ')'" }
         }
-        return stackRPN.pop().toString()
+        return stackRPN.pop().toString().replaceFirst(Regex("\\.0*$|(\\.\\d*?)0+$"), "$1")
     }
 }

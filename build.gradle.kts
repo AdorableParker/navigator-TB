@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/2/14 上午3:11
+ */
+
 plugins {
     val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion
@@ -30,6 +36,7 @@ dependencies {
     implementation("com.beust:klaxon:5.4")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("org.xerial:sqlite-jdbc:3.34.0")
+    implementation("com.mayabot.mynlp:mynlp-all:3.2.1")
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("net.mamoe:mirai-console-terminal:2.0.0") // 前端, 用于启动测试
