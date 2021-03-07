@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/2/14 上午3:11
+ * 最后编辑于: 2021/3/7 上午9:49
  */
 
 package org.mirai.plugin
@@ -9,7 +9,6 @@ package org.mirai.plugin
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.contact.PermissionDeniedException
 
 @ConsoleExperimentalApi
 object AutoBanned : SimpleCommand(
@@ -18,12 +17,13 @@ object AutoBanned : SimpleCommand(
 ) {
     @Handler
     suspend fun MemberCommandSenderOnMessage.main(durationSeconds: Int) {
-        try {
+        runCatching {
             if (durationSeconds != 0) {
                 user.mute(durationSeconds)
-                sendMessage("您的套餐已到，请注意查收。")
             }
-        } catch (error: PermissionDeniedException) {
+        }.onSuccess {
+            sendMessage("您的套餐已到，请注意查收。")
+        }.onFailure {
             sendMessage("嘤嘤嘤，在本群权限不足")
         }
     }
