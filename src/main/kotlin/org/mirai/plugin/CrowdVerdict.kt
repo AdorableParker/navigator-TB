@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/2/14 上午3:11
+ * 最后编辑于: 2021/3/7 上午9:51
  */
 
 package org.mirai.plugin
@@ -9,10 +9,12 @@ package org.mirai.plugin
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.utils.info
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
-data class VoteUser(var vote: Int = 0, val idList: MutableList<Long> = mutableListOf()) {
-
+data class VoteUser(var vote: Int = 0, val idList: MutableList<Long> = mutableListOf(), val startTime: Long) {
     fun poll(i: Int, voter: Long): Int {
         idList.add(voter)
         vote += i
@@ -26,52 +28,58 @@ object CrowdVerdict : SimpleCommand(
     description = "众裁禁言"
 ) {
     @Handler
-    suspend fun MemberCommandSenderOnMessage.main(uid: Long) {
-        PluginMain.logger.info { "测试命令执行" }
-        val crowdReferees = group.members[uid]
-        if (crowdReferees == null) {
-            sendMessage("本群查无此人")
-            return
-        }
-        val name = if (crowdReferees.nameCard == "null") crowdReferees.nameCard else crowdReferees.nick
-        val nameB = if (user.nameCard == "null") user.nameCard else user.nick
-
-        val voteUser = if (PluginMain.VOTELIST[uid] != null) PluginMain.VOTELIST[uid] else {
-            sendMessage("${nameB}发起了对于 $name 的众裁")
-            PluginMain.VOTELIST[uid] = VoteUser()
-            PluginMain.VOTELIST[uid]
+    suspend fun MemberCommandSenderOnMessage.main(target: Member) {
+        val name = if (target.nameCard == "") target.nick else target.nameCard
+        val nameB = if (user.nameCard == "") user.nick else user.nameCard
+        val t = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        val voteUser = if (PluginMain.VOTES[target.id] != null &&
+            t - PluginMain.VOTES[target.id]!!.startTime <= 600
+        ) {
+            PluginMain.VOTES[target.id]
+        } else {
+            sendMessage("${nameB}发起了对${name}的众裁")
+            PluginMain.VOTES[target.id] = VoteUser(startTime = t)
+            PluginMain.VOTES[target.id]
         }
         if (voteUser == null) {
             sendMessage("众裁系统异常")
             return
         }
-        PluginMain.logger.info { "${voteUser.idList}" }
         if (voteUser.idList.indexOf(user.id) == -1) {
-            sendMessage("众裁票数+1,目前票数${voteUser.poll(1, user.id)}")
+            sendMessage("众裁人数+1,通过后,被裁决者将会被禁言${voteUser.poll(2, user.id)}分钟")
         } else {
             sendMessage("你已经投过票了")
         }
         if (voteUser.idList.size >= 10) {
-            sendMessage("众裁通过，$name 被执行裁决")
-            crowdReferees.mute(voteUser.vote * 60)
+            runCatching {
+                target.mute(voteUser.vote * 60)
+            }.onSuccess {
+                PluginMain.VOTES.remove(target.id)
+                sendMessage("众裁通过,$name 被执行裁决")
+            }.onFailure {
+                sendMessage("执行失败,请检查权限")
+            }
         }
+        PluginMain.logger.info { "${PluginMain.VOTES}" }
     }
 
     @Handler
-    suspend fun MemberCommandSenderOnMessage.main(uid: Long, vote: Int) {
-        PluginMain.logger.info { "测试命令执行" }
-        val crowdReferees = group.members[uid]
-        if (crowdReferees == null) {
-            sendMessage("本群查无此人")
+    suspend fun MemberCommandSenderOnMessage.main(target: Member, vote: Int) {
+        if (vote <= 0) {
+            sendMessage("反对无效")
             return
         }
-        val name = if (crowdReferees.nameCard == "null") crowdReferees.nameCard else crowdReferees.nick
-        val nameB = if (user.nameCard == "null") user.nameCard else user.nick
-
-        val voteUser = if (PluginMain.VOTELIST[uid] != null) PluginMain.VOTELIST[uid] else {
-            sendMessage("${nameB}发起了对于 $name 的众裁")
-            PluginMain.VOTELIST[uid] = VoteUser()
-            PluginMain.VOTELIST[uid]
+        val name = if (target.nameCard == "") target.nick else target.nameCard
+        val nameB = if (user.nameCard == "") user.nick else user.nameCard
+        val t = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        val voteUser = if (PluginMain.VOTES[target.id] != null &&
+            t - PluginMain.VOTES[target.id]!!.startTime <= 600
+        ) {
+            PluginMain.VOTES[target.id]
+        } else {
+            sendMessage("${nameB}发起了对${name}的众裁")
+            PluginMain.VOTES[target.id] = VoteUser(startTime = t)
+            PluginMain.VOTES[target.id]
         }
         if (voteUser == null) {
             sendMessage("众裁系统异常")
@@ -79,13 +87,31 @@ object CrowdVerdict : SimpleCommand(
         }
         PluginMain.logger.info { "${voteUser.idList}" }
         if (voteUser.idList.indexOf(user.id) == -1) {
-            sendMessage("众裁票数+1,目前票数${voteUser.poll(vote, user.id)}")
+            if (vote >= 2) {
+                runCatching {
+                    user.mute(vote * 30)
+                }.onSuccess {
+                    sendMessage("众裁人数+1,${nameB}加码,众裁通过后,被裁决者将会被禁言${voteUser.poll(vote, user.id)}分钟")
+                }.onFailure {
+                    sendMessage("执行失败,请检查权限")
+                }
+            } else {
+                sendMessage("众裁人数+1,通过后,被裁决者将会被禁言${voteUser.poll(vote, user.id)}分钟")
+            }
         } else {
             sendMessage("你已经投过票了")
         }
         if (voteUser.idList.size >= 10) {
             sendMessage("众裁通过，$name 被执行裁决")
-            crowdReferees.mute(voteUser.vote * 60)
+            runCatching {
+                target.mute(voteUser.vote * 60)
+            }.onSuccess {
+                PluginMain.VOTES.remove(target.id)
+                sendMessage("众裁通过,$name 被执行裁决")
+            }.onFailure {
+                sendMessage("执行失败,请检查权限")
+            }
         }
+        PluginMain.logger.info { "${PluginMain.VOTES}" }
     }
 }
