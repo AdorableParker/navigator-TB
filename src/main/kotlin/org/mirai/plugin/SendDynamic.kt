@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/3/7 上午10:22
+ */
+
 package org.mirai.plugin
 
 import com.beust.klaxon.JsonObject
@@ -46,7 +52,9 @@ object SendDynamic : CompositeCommand(
 //
 //        }
 //        }else{
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
 //        }
 //        sendMessage(getDynamic(233114659))
@@ -76,7 +84,9 @@ object SendDynamic : CompositeCommand(
 //
 //        }
 //        }else{
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
 //        }
     }
@@ -85,7 +95,9 @@ object SendDynamic : CompositeCommand(
     suspend fun MemberCommandSenderOnMessage.arKnights() {
         val (timeStamp, text, images) = getDynamic(161775300)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -100,7 +112,9 @@ object SendDynamic : CompositeCommand(
         }
         val (timeStamp, text, images) = getDynamic(161775300, index)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -108,7 +122,9 @@ object SendDynamic : CompositeCommand(
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder() {
         val (timeStamp, text, images) = getDynamic(233108841)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -123,7 +139,9 @@ object SendDynamic : CompositeCommand(
         }
         val (timeStamp, text, images) = getDynamic(233108841, index)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -146,7 +164,9 @@ object SendDynamic : CompositeCommand(
         }
         val (timeStamp, text, images) = getDynamic(401742377, index)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -154,7 +174,9 @@ object SendDynamic : CompositeCommand(
     suspend fun MemberCommandSenderOnMessage.other(uid: Int) {
         val (timeStamp, text, images) = getDynamic(uid)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
@@ -169,7 +191,9 @@ object SendDynamic : CompositeCommand(
         }
         val (timeStamp, text, images) = getDynamic(uid, index)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-        images?.let { subject.sendImage(it) }
+        images.use {
+            it?.let { subject.sendImage(it) }
+        }
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 

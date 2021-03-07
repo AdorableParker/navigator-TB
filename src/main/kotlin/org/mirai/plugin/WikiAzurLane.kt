@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/3/7 上午10:22
+ */
+
 package org.mirai.plugin
 
 import net.mamoe.mirai.console.command.CommandManager
@@ -26,42 +32,46 @@ object WikiAzurLane : CompositeCommand(
     @SubCommand("强度榜", "强度主榜", "1")
     suspend fun MemberCommandSenderOnMessage.strengthRanking() {
 //        TB.logger.info { "获取图片" }
-        val imageStream = getWikiImg("PVE用舰船综合性能强度榜", 1)
-        if (imageStream != null) {
-            subject.sendImage(imageStream)
-        } else {
-            sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+        getWikiImg("PVE用舰船综合性能强度榜", 1).use {
+            if (it != null) {
+                subject.sendImage(it)
+            } else {
+                sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+            }
         }
     }
 
     @SubCommand("强度副榜", "2")
     suspend fun MemberCommandSenderOnMessage.strengthDeputyRanking() {
-        val imageStream = getWikiImg("PVE用舰船综合性能强度榜", 2)
-        if (imageStream != null) {
-            subject.sendImage(imageStream)
-        } else {
-            sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+        getWikiImg("PVE用舰船综合性能强度榜", 2).use {
+            if (it != null) {
+                subject.sendImage(it)
+            } else {
+                sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
 
+            }
         }
     }
 
     @SubCommand("装备榜", "3")
     suspend fun MemberCommandSenderOnMessage.equipmentRanking() {
-        val imageStream = getWikiImg("装备一图榜", 0)
-        if (imageStream != null) {
-            subject.sendImage(imageStream)
-        } else {
-            sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+        getWikiImg("装备一图榜", 0).use {
+            if (it != null) {
+                subject.sendImage(it)
+            } else {
+                sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+            }
         }
     }
 
     @SubCommand("P站榜", "社保榜", "4")
     suspend fun MemberCommandSenderOnMessage.pixivRanking() {
-        val imageStream = getWikiImg("P站搜索结果一览榜（社保榜）", 0)
-        if (imageStream != null) {
-            subject.sendImage(imageStream)
-        } else {
-            sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+        getWikiImg("P站搜索结果一览榜（社保榜）", 0).use {
+            if (it != null) {
+                subject.sendImage(it)
+            } else {
+                sendMessage("访问Wiki失败惹,这一定是塞壬的阴谋\nε(┬┬﹏┬┬)3")
+            }
         }
     }
 

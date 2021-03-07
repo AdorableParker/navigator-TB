@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午9:57
+ * 最后编辑于: 2021/3/7 上午10:22
  */
 
 package org.mirai.plugin
@@ -86,7 +86,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                             for (groupInfo in groupList) {
                                 val groupID = groupInfo["group_id"] as Int
                                 val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
-                                k?.let { group?.sendImage(it) }
+                                k.use { it?.let { group?.sendImage(it) } }
                                 j?.let { group?.sendMessage("$it\n发布时间:$time") }
                             }
                         }
