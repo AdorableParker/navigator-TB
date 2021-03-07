@@ -1,19 +1,24 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/2/14 上午3:11
+ * 最后编辑于: 2021/3/7 上午9:48
  */
 
+val miraiVersion = "2.5-M1" // Modify here
+
 plugins {
+    val miraiVersion = "2.5-M1" // Modify here
+
     val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.3.0" // mirai-console version
+    id("net.mamoe.mirai-console") version miraiVersion  // mirai-console version
 }
 
+
 mirai {
-    coreVersion = "2.3.0" // mirai-core version
+    coreVersion = miraiVersion // mirai-core version
 }
 
 group = "org.example"
@@ -30,8 +35,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("net.mamoe:mirai-core:2.3.0") // mirai-core 的 API
-    compileOnly("net.mamoe:mirai-console:2.3.0") // 后端
+    compileOnly("net.mamoe:mirai-core:$miraiVersion") // mirai-core 的 API
+    compileOnly("net.mamoe:mirai-console:$miraiVersion") // 后端
 
     implementation("com.beust:klaxon:5.4")
     implementation("org.jsoup:jsoup:1.13.1")
@@ -39,6 +44,6 @@ dependencies {
     implementation("com.mayabot.mynlp:mynlp-all:3.2.1")
     implementation(kotlin("stdlib-jdk8"))
 
-    testImplementation("net.mamoe:mirai-console-terminal:2.0.0") // 前端, 用于启动测试
+//    testImplementation("net.mamoe:mirai-console-terminal:2.0.0") // 前端, 用于启动测试
 
 }
