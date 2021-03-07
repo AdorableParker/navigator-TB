@@ -1,9 +1,17 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/3/7 上午9:52
+ */
+
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.CommandManager
-import net.mamoe.mirai.console.command.CompositeCommand
-import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
+import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.contact.Member
+import net.mamoe.mirai.contact.isOperator
+import net.mamoe.mirai.event.events.MessageEvent
+import org.mirai.plugin.MyPluginData.tellTimeMode
 
 @ConsoleExperimentalApi
 object GroupPolicy : CompositeCommand(
@@ -16,22 +24,26 @@ object GroupPolicy : CompositeCommand(
         *1* 报时模式
         *2* 订阅模式
         *3* 每日提醒模式
+        *4* 教学许可
         """.trimIndent()
 
     @SubCommand("报时模式", "1")
     suspend fun MemberCommandSenderOnMessage.tellTime(mode: Int) {
+        if (permissionCheck(user)) {
+            sendMessage("权限不足")
+            return
+        }
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
-        when (mode) {
-            0 -> {
+        if (tellTimeMode.containsKey(mode)) {
+            dbObject.update("Policy", "group_id", group.id, "TellTimeMode", mode)
+            sendMessage("报时设定到模式 ${tellTimeMode[mode]}")
+        } else {
+            if (mode == 0) {
                 dbObject.update("Policy", "group_id", group.id, "TellTimeMode", "0")
                 sendMessage("已关闭本群报时")
-            }
-            1, 2, 3, 4, 5 -> {
-                dbObject.update("Policy", "group_id", group.id, "TellTimeMode", mode)
-                sendMessage("报时设定到模式$mode")
-            }
-            else -> {
-                tellTime()
+            } else {
+                dbObject.update("Policy", "group_id", group.id, "TellTimeMode", -1)
+                sendMessage("未知的模式，报时设定到标准模式")
             }
         }
         dbObject.closeDB()
@@ -39,25 +51,21 @@ object GroupPolicy : CompositeCommand(
 
     @SubCommand("报时模式", "1")
     suspend fun MemberCommandSenderOnMessage.tellTime() {
+        val info: MutableList<String> = mutableListOf()
+        tellTimeMode.forEach {
+            info.add("${it.key}\t    ${it.value}")
+        }
         sendMessage(
-            """
-            无效模式参数，设定失败,请参考以下示范命令
-            群策略 报时模式 [模式值]
-            ——————————
-            模式值 | 说明
-            0	    关闭报时
-            1	    舰队Collection-中文
-            2	    舰队Collection-日文
-            3	    明日方舟
-            4	    舰队Collection-音频
-            5       标准报时
-            """.trimIndent()
+            "无效模式参数，设定失败,请参考以下示范命令\n群策略 报时模式 [模式值]\n——————————\n模式值 | 说明\n${info.joinToString("\n")}\n-\t    标准报时"
         )
     }
 
-
     @SubCommand("订阅模式", "2")
     suspend fun MemberCommandSenderOnMessage.subscription(mode: String) {
+        if (permissionCheck(user)) {
+            sendMessage("权限不足")
+            return
+        }
         val i = mode.toIntOrNull(16)
         if (i != null && i >= 0) {
             val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
@@ -66,6 +74,7 @@ object GroupPolicy : CompositeCommand(
             dbObject.update("SubscribeInfo", "group_id", group.id, "FateGrandOrder", if (i and 4 == 4) 1.0 else 0.0)
             dbObject.update("SubscribeInfo", "group_id", group.id, "GenShin", if (i and 8 == 8) 1.0 else 0.0)
             sendMessage("订阅设定到模式$mode")
+            dbObject.closeDB()
         } else {
             subscription()
         }
@@ -97,6 +106,10 @@ object GroupPolicy : CompositeCommand(
 
     @SubCommand("每日提醒模式", "3")
     suspend fun MemberCommandSenderOnMessage.dailyReminder(mode: Int) {
+        if (permissionCheck(user)) {
+            sendMessage("权限不足")
+            return
+        }
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
         when (mode) {
             0 -> {
@@ -128,5 +141,80 @@ object GroupPolicy : CompositeCommand(
             3	    同时开启 AzurLane 与 FateGrandOrder 每日提醒
             """.trimIndent()
         )
+    }
+
+    @SubCommand("教学许可", "4")
+    suspend fun MemberCommandSenderOnMessage.teaching(switch: Int) {
+        if (permissionCheck(user)) {
+            sendMessage("权限不足")
+            return
+        }
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
+        if (switch > 0) {
+            dbObject.update("Policy", "group_id", group.id, "Teaching", 1.0)
+            sendMessage("已开启本群教学模式")
+        } else {
+            dbObject.update("Policy", "group_id", group.id, "Teaching", 0.0)
+            sendMessage("已关闭本群教学模式")
+        }
+        dbObject.closeDB()
+    }
+
+    @SubCommand("教学许可", "4")
+    suspend fun MemberCommandSenderOnMessage.teaching() {
+        sendMessage(
+            """
+            无效模式参数，设定失败,请参考以下示范命令
+            群策略 教学许可 [模式值]
+            ——————————
+            模式值 | 说明
+            > 0	    开启教学功能
+            ≯ 0     关闭教学功能
+            """.trimIndent()
+        )
+    }
+
+    @SubCommand("超级控制台")
+    suspend fun CommandSenderOnMessage<MessageEvent>.superConsole(func: String, groupID: Long, mode: Int) {
+        if (isUser() && user.id == MySetting.AdminID) {
+            val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
+            when (func) {
+                "1" -> dbObject.update("Policy", "group_id", groupID, "TellTimeMode", mode)
+                "2" -> {
+                    dbObject.update("SubscribeInfo", "group_id", groupID, "AzurLane", if (mode and 1 == 1) 1.0 else 0.0)
+                    dbObject.update(
+                        "SubscribeInfo",
+                        "group_id",
+                        groupID,
+                        "ArKnights",
+                        if (mode and 2 == 2) 1.0 else 0.0
+                    )
+                    dbObject.update(
+                        "SubscribeInfo",
+                        "group_id",
+                        groupID,
+                        "FateGrandOrder",
+                        if (mode and 4 == 4) 1.0 else 0.0
+                    )
+                    dbObject.update("SubscribeInfo", "group_id", groupID, "GenShin", if (mode and 8 == 8) 1.0 else 0.0)
+                }
+                "3" -> dbObject.update("Policy", "group_id", groupID, "DailyReminderMode", mode)
+                "4" -> dbObject.update("Policy", "group_id", groupID, "Teaching", mode)
+                else -> dbObject.update("Policy", "group_id", groupID, func, mode)
+            }
+            dbObject.closeDB()
+            sendMessage("OK")
+        } else {
+            sendMessage("权限不足")
+        }
+    }
+
+    @SubCommand("超级控制台")
+    suspend fun CommandSenderOnMessage<MessageEvent>.superConsole() {
+        sendMessage("权限不足")
+    }
+
+    private fun permissionCheck(user: Member): Boolean {
+        return user.permission.isOperator().not()
     }
 }
