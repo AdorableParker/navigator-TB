@@ -1,6 +1,13 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/3/7 上午9:54
+ */
+
 package org.mirai.plugin
 
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import java.nio.file.Path
 import java.sql.Connection
@@ -34,7 +41,7 @@ class SQLiteJDBC(DbPath: Path) {
      */
     fun createTable(sql: String) {
         if (executeSQL(sql) < 0) {
-            PluginMain.logger.warning { "执行SQL异常" }
+            PluginMain.logger.warning { "执行SQL创建表操作异常" }
         }
     }
 
@@ -46,8 +53,9 @@ class SQLiteJDBC(DbPath: Path) {
         val sql = "INSERT INTO $table " +
                 "${column.joinToString(",", "(", ")")} VALUES " +
                 "${value.joinToString(",", "(", ")")};"
+        PluginMain.logger.info { sql }
         if (executeSQL(sql) < 0) {
-            PluginMain.logger.warning { "执行SQL异常" }
+            PluginMain.logger.warning { "执行SQL插入操作异常" }
         }
     }
 
@@ -64,7 +72,7 @@ class SQLiteJDBC(DbPath: Path) {
             "${data.joinToString(",", "(", ")")} WHERE " +
             "$column = $value;"
         if (executeSQL(sql) < 0) {
-            PluginMain.logger.warning { "执行SQL异常" }
+            PluginMain.logger.warning { "执行SQL更改操作异常" }
         }
     }
 
@@ -77,7 +85,7 @@ class SQLiteJDBC(DbPath: Path) {
     fun update(table: String, column: String, value: Any, key: String, data: Any) {
         val sql = "UPDATE $table SET $key = $data WHERE $column = $value;"
         if (executeSQL(sql) < 0) {
-            PluginMain.logger.warning { "执行SQL异常" }
+            PluginMain.logger.warning { "执行SQL更改操作异常" }
         }
     }
 
@@ -88,7 +96,17 @@ class SQLiteJDBC(DbPath: Path) {
     fun delete(table: String, column: String, value: String) {
         val sql = "DELETE FROM $table WHERE $column = $value;"
         if (executeSQL(sql) < 0) {
-            PluginMain.logger.warning { "执行SQL异常" }
+            PluginMain.logger.warning { "执行SQL删除操作异常" }
+        }
+    }
+
+    fun delete(table: String, column: List<String>, value: List<String>, conjunction: String) {
+        val valueIterator = value.iterator()
+        val determiner: MutableList<String> = ArrayList()
+        column.forEach { determiner.add("$it = ${valueIterator.next()}") }
+        val sql = "DELETE FROM $table WHERE ${determiner.joinToString(" $conjunction ")};"
+        if (executeSQL(sql) < 0) {
+            PluginMain.logger.warning { "执行SQL删除操作异常" }
         }
     }
 
@@ -170,7 +188,7 @@ class SQLiteJDBC(DbPath: Path) {
             2 -> column.forEach { determiner.add("$it GLOB '*${valueIterator.next()}'") }
             3 -> column.forEach { determiner.add("$it GLOB '${valueIterator.next()}*'") }
             4 -> column.forEach { determiner.add("$it GLOB '*${valueIterator.next()}*'") }
-            else -> column.forEach { determiner.add("$it = ${valueIterator.next()}") }
+            else -> column.forEach { determiner.add("$it = '${valueIterator.next()}'") }
         }
         val sql = "SELECT * FROM $table WHERE ${determiner.joinToString(" $conjunction ")};"
         try {
@@ -195,6 +213,32 @@ class SQLiteJDBC(DbPath: Path) {
         }
         return resultList
     }
+
+    fun executeStatement(sql: String): MutableList<MutableMap<String?, Any?>> {
+        val resultList: MutableList<MutableMap<String?, Any?>> = ArrayList()
+        try {
+            stmt = c?.createStatement()
+            val rs: ResultSet? = stmt?.executeQuery(sql)
+            if (rs != null) {
+                val metadata = rs.metaData
+                val columnCount = metadata.columnCount
+                while (rs.next()) {
+                    val row: MutableMap<String?, Any?> = mutableMapOf()
+                    for (i in 1..columnCount) {
+                        row[metadata.getColumnName(i)] = rs.getObject(i)
+                    }
+                    resultList.add(row)
+                }
+                rs.close()
+            }
+            stmt?.close()
+        } catch (e: java.lang.Exception) {
+            PluginMain.logger.warning { e.javaClass.name + ": " + e.message }
+            exitProcess(0)
+        }
+        return resultList
+    }
+
 
     /**
      * 关闭数据库
