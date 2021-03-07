@@ -1,13 +1,14 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/2/14 上午3:11
+ * 最后编辑于: 2021/3/7 上午9:57
  */
 
 package org.mirai.plugin
 
 import com.mayabot.nlp.module.summary.KeywordSummary
-import com.mayabot.nlp.segment.Lexers
+import com.mayabot.nlp.segment.Lexers.coreBuilder
+import com.mayabot.nlp.segment.Sentence
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
@@ -20,6 +21,11 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact.Companion.sendImage
+import net.mamoe.mirai.event.EventPriority
+import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.event.globalEventChannel
+import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
@@ -33,14 +39,16 @@ data class Dynamic(val timestamp: Long?, val text: String?, val imageURL: InputS
 
 @ConsoleExperimentalApi
 object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
-    val LEXER = Lexers.coreBuilder()
-//            .withPos() //词性标注功能
+    private val LEXER = coreBuilder()
+        .withPos() //词性标注功能
         .withPersonName() // 人名识别功能
-        .withNer() // 命名实体识别
+//        .withNer() // 命名实体识别
         .build()
+
     val KEYWORD_SUMMARY = KeywordSummary()
 
-    val VOTELIST: MutableMap<Long, VoteUser> = mutableMapOf()
+    //    KeywordSummary
+    val VOTES: MutableMap<Long, VoteUser> = mutableMapOf()
 
     override fun onEnable() {
         MySetting.reload() // 从数据库自动读
@@ -48,17 +56,20 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         logger.info { "Hi: ${MySetting.name}" } // 输出一条日志.
 
 //        MySetting.count++ // 对 Setting 的改动会自动在合适的时间保存
-        CalculationExp.register() // 注册指令
-        WikiAzurLane.register()
-        Construction.register()
-        ShipMap.register()
-        SendDynamic.register()
-        GroupPolicy.register()
-        Roster.register()
-        Calculator.register()
-        AutoBanned.register()
-        CrowdVerdict.register()
-        Test.register()
+        CalculationExp.register()   // 经验计算器
+        WikiAzurLane.register()     // 碧蓝Wiki
+        Construction.register()     // 建造时间
+        ShipMap.register()          // 打捞地图
+        SendDynamic.register()      // 动态查询
+        GroupPolicy.register()      // 群策略
+        Roster.register()           // 碧蓝和谐名
+        Calculator.register()       // 计算器
+        AutoBanned.register()       // 自助禁言
+        CrowdVerdict.register()     // 众裁
+        SauceNAO.register()         // 搜图
+        Request.register()          // 加群操作
+        Test.register()             // 测试
+        AI.register()               // 图灵数据库增删改查
         // 动态更新
         PluginMain.launch {
             val job1 = CronJob("动态更新")
@@ -93,28 +104,32 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 val dbObject = SQLiteJDBC(resolveDataPath("AssetData.db"))
                 val scriptList = dbObject.select("script", "House", time, 1)
                 dbObject.closeDB()
-                val script1 = scriptList.filter { it["mode"] == 1 }
-                val script2 = scriptList.filter { it["mode"] == 2 }
-                val script3 = scriptList.filter { it["mode"] == 3 }
-                val script4 = scriptList.filter { it["mode"] == 4 }
+
                 val userDbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupList = userDbObject.select("Policy", "TellTimeMode", 0, 5)
                 userDbObject.closeDB()
+                val script = mutableMapOf<Int, List<MutableMap<String?, Any?>>>()
                 for (groupPolicy in groupList) {
                     val groupID = groupPolicy["group_id"] as Int
                     val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
-                    when (groupPolicy["TellTimeMode"]) {
-                        1 -> group?.sendMessage(script1.random()["content"] as String)
-                        2 -> group?.sendMessage(script2.random()["content"] as String)
-                        3 -> group?.sendMessage(script3.random()["content"] as String)
-                        4 -> {
-                            val path = PluginMain.resolveDataPath("./报时语音/${script4.random()["content"] as String}")
-                            val voice = File("$path").toExternalResource().use {
-                                group?.uploadVoice(it)
-                            }
-                            voice?.let { group?.sendMessage(it) }
+                    val groupMode = groupPolicy["TellTimeMode"] as Int
+                    if (groupMode == -1) {
+                        group?.sendMessage("现在${time}点咯")
+                        return@addJob
+                    }
+                    if (script.containsKey(groupMode).not()) {
+                        script[groupPolicy["TellTimeMode"] as Int] =
+                            scriptList.filter { it["mode"] == groupPolicy["TellTimeMode"] }
+                    }
+                    val outScript = script[groupMode]?.random()?.get("content") as String
+                    if (groupMode % 2 == 0) {      //偶数
+                        val path = PluginMain.resolveDataPath("./报时语音/$outScript")
+                        val voice = File("$path").toExternalResource().use {
+                            group?.uploadVoice(it)
                         }
-                        else -> group?.sendMessage("现在${time}点咯")
+                        voice?.let { group?.sendMessage(it) }
+                    } else {                      //奇数
+                        group?.sendMessage(outScript)
                     }
                 }
             }
@@ -164,20 +179,75 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             job3.start(MyTime(24, 0), MyTime(21, 0))
 //            job3.start(MyTime(0, 3))
         }
+
+        // Mark: 这玩意似乎并不会生效
+        this.globalEventChannel().subscribeAlways<BotInvitedJoinGroupRequestEvent> {
+            PluginMain.logger.info { "\nGroupName:${it.groupName}\nGroupID：${it.groupId}\nList:${MyPluginData.groupIdList}" }
+            if (MyPluginData.groupIdList.contains(it.groupId)) {
+                it.accept()
+                MyPluginData.groupIdList.remove(it.groupId)
+                PluginMain.logger.info { "PASS" }
+            } else {
+                it.ignore()
+                PluginMain.logger.info { "FAIL" }
+            }
+        }
+
+        this.globalEventChannel().subscribeAlways<MessageEvent>(priority = EventPriority.LOWEST) {
+            val den = MySetting.initiativeSayProbability["Denominator"]
+            val numerator = MySetting.initiativeSayProbability["numerator"]
+            if (den == null || numerator == null) {
+                PluginMain.logger.warning { "缺失配置项" }
+                return@subscribeAlways
+            }
+            if (!this.isIntercepted && (1..den).random() <= numerator) {
+                val wordList: Sentence = LEXER.scan(message.content)
+                val key = KEYWORD_SUMMARY.keyword(message.content, 1)[0]
+                val dbObject = SQLiteJDBC(resolveDataPath("AI.db"))
+                val rList = dbObject.select("Corpus", "keys", key, 0)
+                val r = mutableListOf<String>()
+                var jaccardMax = 0.5
+                for (i in rList) {
+                    val formID = i["fromGroup"].toString().toLong()
+                    if (formID != subject.id && formID != 0L) continue
+                    val a = mutableListOf<String>()
+                    val b = mutableListOf<String>()
+                    val s = LEXER.scan(i["question"].toString())
+
+                    s.toList().forEach { a.add(it.toString()) }
+                    wordList.toList().forEach { b.add(it.toString()) }
+
+                    val jaccardIndex = a.size.toDouble() / b.size.toDouble()
+                    when {
+                        jaccardIndex > jaccardMax -> {
+                            jaccardMax = jaccardIndex
+                            r.clear()
+                            r.add(i["answer"] as String)
+                        }
+                        jaccardIndex == jaccardMax -> r.add(i["answer"] as String)
+                        jaccardIndex < jaccardMax -> continue
+                    }
+                }
+                if (r.size > 0) subject.sendMessage(r.random())
+            }
+        }
     }
 
     override fun onDisable() {
-        CalculationExp.unregister() // 取消注册指令
-        WikiAzurLane.unregister()
-        Construction.unregister()
-        ShipMap.unregister()
-        SendDynamic.unregister()
-        GroupPolicy.unregister()
-        Test.unregister()
-        Roster.unregister()
-        Calculator.unregister()
-        AutoBanned.unregister()
-        CrowdVerdict.unregister()
+        CalculationExp.unregister() // 经验计算器
+        WikiAzurLane.unregister()   // 碧蓝Wiki
+        Construction.unregister()   // 建造时间
+        ShipMap.unregister()        // 打捞地图
+        SendDynamic.unregister()    // 动态查询
+        GroupPolicy.unregister()    // 群策略
+        Test.unregister()           // 测试
+        Roster.unregister()         // 碧蓝和谐名
+        Calculator.unregister()     // 计算器
+        AutoBanned.unregister()     // 自助禁言
+        CrowdVerdict.unregister()   // 众裁
+        SauceNAO.unregister()       // 搜图
+        Request.unregister()        // 加群操作
+        AI.unregister()               // 图灵数据库增删改查
         PluginMain.cancel()
     }
 }
@@ -201,6 +271,18 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
             401742377 to "GenShin"
         )
     )
+    val tellTimeMode: MutableMap<Int, String> by value(
+        mutableMapOf(
+            1 to "舰队Collection-中文",
+            3 to "舰队Collection-日文",
+            5 to "明日方舟",
+            2 to "舰队Collection-音频",
+            4 to "千恋*万花-音频(芳乃/茉子/丛雨/蕾娜)"
+        )
+    )
+    val groupIdList: MutableList<Long> by value(
+        mutableListOf()
+    )
 //    var long: Long by value(0L) // 允许 var
 //    var int by value(0) // 可以使用类型推断, 但更推荐使用 `var long: Long by value(0)` 这种定义方式.
 
@@ -215,6 +297,9 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
 object MySetting : AutoSavePluginConfig("TB_Setting") {
     val name by value("领航员-TB")
     val BotID by value(123456L)
+    val SauceNAOKey by value("你的Key")
+    val AdminID by value(123456L)
+    val initiativeSayProbability: Map<String, Int> by value(mapOf("Denominator" to 3, "numerator" to 1)) // 支持 Map
 
 //    @ValueDescription("数量") // 注释写法, 将会保存在 MySetting.yml 文件中.
 //    var count by value(0)
