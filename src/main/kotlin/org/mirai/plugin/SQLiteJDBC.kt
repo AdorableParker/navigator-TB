@@ -1,13 +1,12 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午9:54
+ * 最后编辑于: 2021/3/9 下午7:10
  */
 
 package org.mirai.plugin
 
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import java.nio.file.Path
 import java.sql.Connection
@@ -53,7 +52,7 @@ class SQLiteJDBC(DbPath: Path) {
         val sql = "INSERT INTO $table " +
                 "${column.joinToString(",", "(", ")")} VALUES " +
                 "${value.joinToString(",", "(", ")")};"
-        PluginMain.logger.info { sql }
+//        PluginMain.logger.info { sql }
         if (executeSQL(sql) < 0) {
             PluginMain.logger.warning { "执行SQL插入操作异常" }
         }

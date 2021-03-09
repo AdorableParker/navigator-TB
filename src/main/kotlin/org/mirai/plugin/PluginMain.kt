@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午10:22
+ * 最后编辑于: 2021/3/9 下午7:10
  */
 
 package org.mirai.plugin
@@ -23,7 +23,7 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
-import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
@@ -53,8 +53,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
     override fun onEnable() {
         MySetting.reload() // 从数据库自动读
         MyPluginData.reload()
-        logger.info { "Hi: ${MySetting.name}" } // 输出一条日志.
-
+        CacheData.reload()
 //        MySetting.count++ // 对 Setting 的改动会自动在合适的时间保存
         CalculationExp.register()   // 经验计算器
         WikiAzurLane.register()     // 碧蓝Wiki
@@ -82,14 +81,19 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                         val groupList =
                             MyPluginData.nameOfDynamic[list.key]?.let { dbObject.select("SubscribeInfo", it, 1.0, 1) }
                         dbObject.closeDB()
+
                         if (groupList != null) {
                             for (groupInfo in groupList) {
                                 val groupID = groupInfo["group_id"] as Int
                                 val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
-                                k.use { it?.let { group?.sendImage(it) } }
-                                j?.let { group?.sendMessage("$it\n发布时间:$time") }
+                                if (group == null || group.botMuteRemaining > 0) {
+                                    continue
+                                }
+                                k?.let { group.sendImage(it) }
+                                j?.let { group.sendMessage("$it\n发布时间:$time") }
                             }
                         }
+                        k?.use {}
                     }
                 }
 
@@ -108,32 +112,39 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 val userDbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupList = userDbObject.select("Policy", "TellTimeMode", 0, 5)
                 userDbObject.closeDB()
+
                 val script = mutableMapOf<Int, List<MutableMap<String?, Any?>>>()
                 for (groupPolicy in groupList) {
                     val groupID = groupPolicy["group_id"] as Int
                     val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
+                    if (group == null || group.botMuteRemaining > 0) continue
+
                     val groupMode = groupPolicy["TellTimeMode"] as Int
                     if (groupMode == -1) {
-                        group?.sendMessage("现在${time}点咯")
-                        return@addJob
+                        group.sendMessage("现在${time}点咯")
+                        continue
                     }
+
                     if (script.containsKey(groupMode).not()) {
                         script[groupPolicy["TellTimeMode"] as Int] =
                             scriptList.filter { it["mode"] == groupPolicy["TellTimeMode"] }
                     }
                     val outScript = script[groupMode]?.random()?.get("content") as String
+
                     if (groupMode % 2 == 0) {      //偶数
                         val path = PluginMain.resolveDataPath("./报时语音/$outScript")
                         val voice = File("$path").toExternalResource().use {
-                            group?.uploadVoice(it)
+                            group.uploadVoice(it)
                         }
-                        voice?.let { group?.sendMessage(it) }
+                        voice.let { group.sendMessage(it) }
                     } else {                      //奇数
-                        group?.sendMessage(outScript)
+                        group.sendMessage(outScript)
                     }
                 }
             }
             job2.start(MyTime(1, 0))
+//            job2.start(MyTime(0, 1))  // 测试时开启
+
         }
         // 每日提醒
         PluginMain.launch {
@@ -165,12 +176,15 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 for (groupPolicy in groupList) {
                     val groupID = groupPolicy["group_id"] as Int
                     val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
+                    if (group == null || group.botMuteRemaining > 0) {
+                        continue
+                    }
                     when (groupPolicy["DailyReminderMode"]) {
-                        1 -> script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
-                        2 -> script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
+                        1 -> script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group.sendMessage(it) }
+                        2 -> script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group.sendMessage(it) }
                         3 -> {
-                            script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
-                            script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group?.sendMessage(it) }
+                            script[1]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group.sendMessage(it) }
+                            script[2]?.get(LocalDateTime.now().dayOfWeek.value - 1)?.let { group.sendMessage(it) }
                         }
                         else -> PluginMain.logger.warning { "未知的模式" }
                     }
@@ -180,7 +194,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
 //            job3.start(MyTime(0, 3))
         }
 
-        // Mark: 这玩意似乎并不会生效
+        // 入群审核
         this.globalEventChannel().subscribeAlways<BotInvitedJoinGroupRequestEvent> {
             PluginMain.logger.info { "\nGroupName:${it.groupName}\nGroupID：${it.groupId}\nList:${MyPluginData.groupIdList}" }
             if (MyPluginData.groupIdList.contains(it.groupId)) {
@@ -193,7 +207,9 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
         }
 
-        this.globalEventChannel().subscribeAlways<MessageEvent>(priority = EventPriority.LOWEST) {
+        // 聊天触发
+        this.globalEventChannel().subscribeAlways<GroupMessageEvent>(priority = EventPriority.LOWEST) {
+            if (group.botMuteRemaining > 0) return@subscribeAlways
             val den = MySetting.initiativeSayProbability["Denominator"]
             val numerator = MySetting.initiativeSayProbability["numerator"]
             if (den == null || numerator == null) {
@@ -202,9 +218,12 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
             if (!this.isIntercepted && (1..den).random() <= numerator) {
                 val wordList: Sentence = LEXER.scan(message.content)
-                val key = KEYWORD_SUMMARY.keyword(message.content, 1)[0]
+                val key = KEYWORD_SUMMARY.keyword(message.content, 1)
+                    .let { if (it.isEmpty()) return@subscribeAlways else it[0] }
+
                 val dbObject = SQLiteJDBC(resolveDataPath("AI.db"))
                 val rList = dbObject.select("Corpus", "keys", key, 0)
+                dbObject.closeDB()
                 val r = mutableListOf<String>()
                 var jaccardMax = 0.5
                 for (i in rList) {
@@ -217,7 +236,8 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                     s.toList().forEach { a.add(it.toString()) }
                     wordList.toList().forEach { b.add(it.toString()) }
 
-                    val jaccardIndex = a.size.toDouble() / b.size.toDouble()
+                    val jaccardIndex = (a intersect b).size.toDouble() / (a union b).size.toDouble()
+
                     when {
                         jaccardIndex > jaccardMax -> {
                             jaccardMax = jaccardIndex
@@ -231,6 +251,8 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 if (r.size > 0) subject.sendMessage(r.random())
             }
         }
+
+        logger.info { "Hi: ${MySetting.name},启动完成" } // 输出一条日志.
     }
 
     override fun onDisable() {
@@ -293,6 +315,11 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
 //     可将 MutableMap<Long, Long> 映射到 MutableMap<Bot, Long>.
 //    val botToLongMap: MutableMap<Bot, Long> by value<MutableMap<Long, Long>>().mapKeys(Bot::getInstance, Bot::id)
 }
+
+object CacheData : AutoSavePluginData("TB_TemporaryData") { // "name" 是保存的文件名 (不带后缀)
+    val ActivatedList: MutableSet<Long> by value(mutableSetOf())
+}
+
 
 object MySetting : AutoSavePluginConfig("TB_Setting") {
     val name by value("领航员-TB")

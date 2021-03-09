@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午9:52
+ * 最后编辑于: 2021/3/9 下午7:10
  */
 
 package org.mirai.plugin
@@ -39,7 +39,7 @@ object GroupPolicy : CompositeCommand(
             sendMessage("报时设定到模式 ${tellTimeMode[mode]}")
         } else {
             if (mode == 0) {
-                dbObject.update("Policy", "group_id", group.id, "TellTimeMode", "0")
+                dbObject.update("Policy", "group_id", group.id, "TellTimeMode", 0)
                 sendMessage("已关闭本群报时")
             } else {
                 dbObject.update("Policy", "group_id", group.id, "TellTimeMode", -1)

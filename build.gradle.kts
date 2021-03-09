@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午9:48
+ * 最后编辑于: 2021/3/9 下午7:10
  */
 
 val miraiVersion = "2.5-M1" // Modify here
@@ -21,8 +21,8 @@ mirai {
     coreVersion = miraiVersion // mirai-core version
 }
 
-group = "org.example"
-version = "0.1.0"
+group = "org.navigator-TB"
+version = "0.2.0"
 
 repositories {
     maven("https://dl.bintray.com/him188moe/")
