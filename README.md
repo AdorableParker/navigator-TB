@@ -16,10 +16,12 @@
 * [X] 计算器 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 自助禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 基于`SauceNao`的搜图 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
-* [X] 智障聊天 ![`未测试`](https://img.shields.io/badge/-NotTested-red)
+* [X] 智障聊天 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
+  > `@Me`检查尚未完成
+* [X] 半自动化同意入群邀请 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
+  > 有源于Mirai本身的问题
 * [ ] 随机色图 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
 * [ ] 碧蓝航线的活动计算器 ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)
-* [X] 半自动化同意入群邀请 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
 * [X] ~~成语接龙~~ ![`不会实现`](https://img.shields.io/badge/-Invalid-inactive)
 
 ## 计划在本项目中实现的功能
@@ -31,10 +33,8 @@
 | **说明** | **图标**                                                     |
 | -------: | :----------------------------------------------------------- |
 | 已经实现 | ![`已完成`](https://img.shields.io/badge/_Achieved-green)    |
+|不完美实现| ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple) |
 | 正在进行 | ![`正在推进`](https://img.shields.io/badge/-Underway-blue)   |
 | 暂时搁置 | ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)  |
 |   未测试 | ![`未测试`](https://img.shields.io/badge/-NotTested-red)     |
 | 不会实现 | ![`不会实现`](https://img.shields.io/badge/-Invalid-inactive) |
-
-
-

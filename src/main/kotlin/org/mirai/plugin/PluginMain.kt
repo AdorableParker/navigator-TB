@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/9 下午7:10
+ * 最后编辑于: 2021/3/9 下午7:30
  */
 
 package org.mirai.plugin
@@ -93,7 +93,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                                 j?.let { group.sendMessage("$it\n发布时间:$time") }
                             }
                         }
-                        k?.use {}
+                        k?.use {} // 关闭资源
                     }
                 }
 
