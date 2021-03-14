@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/9 下午7:10
+ * 最后编辑于: 2021/3/14 下午6:16
  */
 
 package org.mirai.plugin
@@ -27,7 +27,7 @@ object GroupPolicy : CompositeCommand(
         *4* 教学许可
         """.trimIndent()
 
-    @SubCommand("报时模式", "1")
+    @SubCommand("报时模式")
     suspend fun MemberCommandSenderOnMessage.tellTime(mode: Int) {
         if (permissionCheck(user)) {
             sendMessage("权限不足")
@@ -49,7 +49,7 @@ object GroupPolicy : CompositeCommand(
         dbObject.closeDB()
     }
 
-    @SubCommand("报时模式", "1")
+    @SubCommand("报时模式")
     suspend fun MemberCommandSenderOnMessage.tellTime() {
         val info: MutableList<String> = mutableListOf()
         tellTimeMode.forEach {
@@ -60,7 +60,7 @@ object GroupPolicy : CompositeCommand(
         )
     }
 
-    @SubCommand("订阅模式", "2")
+    @SubCommand("订阅模式")
     suspend fun MemberCommandSenderOnMessage.subscription(mode: String) {
         if (permissionCheck(user)) {
             sendMessage("权限不足")
@@ -80,7 +80,7 @@ object GroupPolicy : CompositeCommand(
         }
     }
 
-    @SubCommand("订阅模式", "2")
+    @SubCommand("订阅模式")
     suspend fun MemberCommandSenderOnMessage.subscription() {
         sendMessage(
             """
@@ -104,7 +104,7 @@ object GroupPolicy : CompositeCommand(
         )
     }
 
-    @SubCommand("每日提醒模式", "3")
+    @SubCommand("每日提醒模式")
     suspend fun MemberCommandSenderOnMessage.dailyReminder(mode: Int) {
         if (permissionCheck(user)) {
             sendMessage("权限不足")
@@ -127,7 +127,7 @@ object GroupPolicy : CompositeCommand(
         dbObject.closeDB()
     }
 
-    @SubCommand("每日提醒模式", "3")
+    @SubCommand("每日提醒模式")
     suspend fun MemberCommandSenderOnMessage.dailyReminder() {
         sendMessage(
             """
@@ -143,7 +143,7 @@ object GroupPolicy : CompositeCommand(
         )
     }
 
-    @SubCommand("教学许可", "4")
+    @SubCommand("教学许可")
     suspend fun MemberCommandSenderOnMessage.teaching(switch: Int) {
         if (permissionCheck(user)) {
             sendMessage("权限不足")
@@ -160,7 +160,7 @@ object GroupPolicy : CompositeCommand(
         dbObject.closeDB()
     }
 
-    @SubCommand("教学许可", "4")
+    @SubCommand("教学许可")
     suspend fun MemberCommandSenderOnMessage.teaching() {
         sendMessage(
             """

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/9 下午7:10
+ * 最后编辑于: 2021/3/14 下午6:16
  */
 
 package org.mirai.plugin
@@ -9,6 +9,7 @@ package org.mirai.plugin
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.contact.Group
 
 @ConsoleExperimentalApi
 object AI : CompositeCommand(
@@ -103,5 +104,51 @@ object AI : CompositeCommand(
             } else sendMessage("该条目本群无权删除")
         } else sendMessage("没有该条目")
         dbObject.closeDB()
+    }
+
+    suspend fun dialogue(subject: Group, content: String, atMe: Boolean = false) {
+        val wordList = PluginMain.LEXER.scan(content)
+//        PluginMain.logger.info{ "$content,$answer" }
+        val key = PluginMain.KEYWORD_SUMMARY.keyword(content, 1)
+            .let { if (it.isEmpty()) return else it[0] }
+//        PluginMain.logger.info { "pass" }
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
+        val rList = if (key.isNullOrBlank()) {
+            dbObject.select("Corpus", "answer", content, 0)
+        } else {
+            dbObject.select("Corpus", "keys", key, 0)
+        }
+        dbObject.closeDB()
+        val r = mutableListOf<String>()
+        var jaccardMax = 0.6
+        for (i in rList) {
+            val formID = i["fromGroup"].toString().toLong()
+            if (formID != subject.id && formID != 0L) continue
+            val a = mutableListOf<String>()
+            val b = mutableListOf<String>()
+            val s = PluginMain.LEXER.scan(i["question"].toString())
+
+            s.toList().forEach { a.add(it.toString()) }
+            wordList.toList().forEach { b.add(it.toString()) }
+
+            val jaccardIndex = (a intersect b).size.toDouble() / (a union b).size.toDouble()
+
+            when {
+                jaccardIndex > jaccardMax -> {
+                    jaccardMax = jaccardIndex
+                    r.clear()
+                    r.add(i["answer"] as String)
+                }
+                jaccardIndex == jaccardMax -> r.add(i["answer"] as String)
+                jaccardIndex < jaccardMax -> continue
+            }
+        }
+        if (r.size > 0) {
+            subject.sendMessage(r.random())
+            return
+        }
+        if (atMe) {
+            subject.sendMessage("( -`_´- ) (似乎并没有听懂... ")
+        }
     }
 }

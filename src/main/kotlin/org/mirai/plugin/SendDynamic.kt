@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午10:22
+ * 最后编辑于: 2021/3/14 下午6:16
  */
 
 package org.mirai.plugin
@@ -31,36 +31,17 @@ object SendDynamic : CompositeCommand(
             "*4* 派蒙,原神公告,冒险家情报\n" +
             "*5* UID,其他"
 
-    @SubCommand("小加加", "火星加", "碧蓝公告", "1")
+    @SubCommand("小加加", "火星加", "碧蓝公告")
     suspend fun MemberCommandSenderOnMessage.azurLane() {
         val (timeStamp, text, images) = getDynamic(233114659)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-//        if (images?.isEmpty() == true){
-//            TB.logger.info{"有图"}
-//            text?.let { sendMessage("$it\n发布时间:$time") }
-//            for(img in images){
-//                subject.sendImage(img)
-//            }
-//            val image = ExternalResource.
-//            val chain = buildMessageChain{
-//                text?.let { PlainText("$it\n附图：\n发布时间:$time") }
-//                images[0].toExternalResource()
-//            sendMessage(chain)
-//            }
-//        for (image in images){
-//            val s = image.toExternalResource()
-//
-//        }
-//        }else{
         images.use {
             it?.let { subject.sendImage(it) }
         }
         text?.let { sendMessage("$it\n发布时间:$time") }
-//        }
-//        sendMessage(getDynamic(233114659))
     }
 
-    @SubCommand("小加加", "火星加", "碧蓝公告", "1")
+    @SubCommand("小加加", "火星加", "碧蓝公告")
     suspend fun MemberCommandSenderOnMessage.azurLane(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -71,27 +52,14 @@ object SendDynamic : CompositeCommand(
         }
         val (timeStamp, text, images) = getDynamic(233114659, index)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
-//        if (images?.isEmpty() == true){
-//            val f = images[0].toExternalResource()
-//            val chain = buildMessageChain{
-//                text?.let { PlainText("$it\n发布时间:$time") }
-//                add(subject.uploadImage(f))
-//            }
-//            f.close()
-//            sendMessage(chain)
-//        for (image in images){
-//            val s = image.toExternalResource()
-//
-//        }
-//        }else{
+
         images.use {
             it?.let { subject.sendImage(it) }
         }
         text?.let { sendMessage("$it\n发布时间:$time") }
-//        }
     }
 
-    @SubCommand("阿米娅", "方舟公告", "罗德岛线报", "2")
+    @SubCommand("阿米娅", "方舟公告", "罗德岛线报")
     suspend fun MemberCommandSenderOnMessage.arKnights() {
         val (timeStamp, text, images) = getDynamic(161775300)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -101,7 +69,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("阿米娅", "方舟公告", "罗德岛线报", "2")
+    @SubCommand("阿米娅", "方舟公告", "罗德岛线报")
     suspend fun MemberCommandSenderOnMessage.arKnights(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -118,7 +86,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("呆毛王", "FGO公告", "月球人公告", "3")
+    @SubCommand("呆毛王", "FGO公告", "月球人公告")
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder() {
         val (timeStamp, text, images) = getDynamic(233108841)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -128,7 +96,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("呆毛王", "FGO公告", "月球人公告", "3")
+    @SubCommand("呆毛王", "FGO公告", "月球人公告")
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -145,7 +113,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("派蒙", "原神公告", "冒险家情报", "4")
+    @SubCommand("派蒙", "原神公告", "冒险家情报")
     suspend fun MemberCommandSenderOnMessage.genShin() {
         val (timeStamp, text, images) = getDynamic(401742377)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -153,7 +121,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("派蒙", "原神公告", "冒险家情报", "4")
+    @SubCommand("派蒙", "原神公告", "冒险家情报")
     suspend fun MemberCommandSenderOnMessage.genShin(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -170,7 +138,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("UID", "其他", "5")
+    @SubCommand("UID", "其他")
     suspend fun MemberCommandSenderOnMessage.other(uid: Int) {
         val (timeStamp, text, images) = getDynamic(uid)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -180,7 +148,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("UID", "其他", "5")
+    @SubCommand("UID", "其他")
     suspend fun MemberCommandSenderOnMessage.other(uid: Int, index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n(￣﹃￣)")
@@ -229,17 +197,10 @@ object SendDynamic : CompositeCommand(
             // 含图动态
             2 -> {
                 val description = card.obj("item")?.string("description")   // 描述
-                val imgSrc = card.obj("item")?.array<JsonObject>("pictures")?.string("img_src")?.toTypedArray()
+                val imgSrc = card.obj("item")?.array<JsonObject>("pictures")?.get(0)?.string("img_src")
 //                TB.logger.info{"${imgSrc?.get(0)}"}
-                if (imgSrc != null) {
-//                    val images = mutableListOf<InputStream>()
-//                    for(url in imgSrc){
-//                        images.add(URL(url).openConnection().getInputStream())
-//                    }
-//                    return Dynamic(timestamp,description,images)
-                    return Dynamic(timestamp, description, URL(imgSrc[0]).openConnection().getInputStream())
-                }
-                return Dynamic(timestamp, description, null)
+                return if (imgSrc.isNullOrBlank()) Dynamic(timestamp, description, null)
+                else Dynamic(timestamp, description, URL(imgSrc).openConnection().getInputStream())
             }
             // 无图动态
             4 -> return Dynamic(timestamp, "更新动态：${card.obj("item")?.string("content")}", null)
@@ -254,12 +215,10 @@ object SendDynamic : CompositeCommand(
             64 -> {
                 val title = card.string("title")       // 标题
                 val summary = card.string("summary")   // 摘要
-                val imgSrc = card.string("banner_url") // 封面图片
-                return Dynamic(
-                    timestamp,
-                    "专栏标题:$title\n专栏摘要：\n$summary…",
-                    URL(imgSrc).openConnection().getInputStream()
-                )
+//                val imgSrc = card.string("banner_url") // 封面图片 不一定存在
+                val imgSrc = card.array<String>("image_urls")?.get(0) // 封面图片
+                return if (imgSrc.isNullOrBlank()) Dynamic(timestamp, "专栏标题:$title\n专栏摘要：\n$summary…", null)
+                else Dynamic(timestamp, "专栏标题:$title\n专栏摘要：\n$summary…", URL(imgSrc).openConnection().getInputStream())
 //                return Dynamic(timestamp,"专栏标题:$title\n专栏摘要：\n$summary…", mutableListOf(URL(imgSrc).openConnection().getInputStream()))
             }
             // 卡片

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021.
+ * 作者: AdorableParker
+ * 最后编辑于: 2021/3/14 下午6:16
+ */
+
 package org.mirai.plugin
 
 import kotlinx.coroutines.delay
@@ -26,8 +32,7 @@ data class MyTime(var hours: Int, var minute: Int) {
     }
 }
 
-class CronJob(explain: String) {
-    private val jobExplain = explain
+class CronJob(private val jobExplain: String, private val calibration: Int) {
     private var flag = false
     private var calibrationCountdown = 0
     private var jobList = mutableListOf<suspend () -> Unit>()
@@ -47,7 +52,7 @@ class CronJob(explain: String) {
                 job()
             }
             PluginMain.logger.info { "$jobExplain 执行完毕" }
-            if (calibrationCountdown >= 120) {
+            if (calibrationCountdown >= calibration) {
                 PluginMain.logger.info { "$jobExplain 执行校准" }
                 calibrationCountdown = 0
                 val nextTime = MyTime(

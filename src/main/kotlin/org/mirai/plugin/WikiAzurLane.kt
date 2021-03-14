@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午10:22
+ * 最后编辑于: 2021/3/14 下午6:16
  */
 
 package org.mirai.plugin
@@ -29,7 +29,7 @@ object WikiAzurLane : CompositeCommand(
             "*3* 装备榜\n" +
             "*4* P站榜,社保榜"
 
-    @SubCommand("强度榜", "强度主榜", "1")
+    @SubCommand("强度榜", "强度主榜")
     suspend fun MemberCommandSenderOnMessage.strengthRanking() {
 //        TB.logger.info { "获取图片" }
         getWikiImg("PVE用舰船综合性能强度榜", 1).use {
@@ -41,7 +41,7 @@ object WikiAzurLane : CompositeCommand(
         }
     }
 
-    @SubCommand("强度副榜", "2")
+    @SubCommand("强度副榜")
     suspend fun MemberCommandSenderOnMessage.strengthDeputyRanking() {
         getWikiImg("PVE用舰船综合性能强度榜", 2).use {
             if (it != null) {
@@ -53,7 +53,7 @@ object WikiAzurLane : CompositeCommand(
         }
     }
 
-    @SubCommand("装备榜", "3")
+    @SubCommand("装备榜")
     suspend fun MemberCommandSenderOnMessage.equipmentRanking() {
         getWikiImg("装备一图榜", 0).use {
             if (it != null) {
@@ -64,7 +64,7 @@ object WikiAzurLane : CompositeCommand(
         }
     }
 
-    @SubCommand("P站榜", "社保榜", "4")
+    @SubCommand("P站榜", "社保榜")
     suspend fun MemberCommandSenderOnMessage.pixivRanking() {
         getWikiImg("P站搜索结果一览榜（社保榜）", 0).use {
             if (it != null) {

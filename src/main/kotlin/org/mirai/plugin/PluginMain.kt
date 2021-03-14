@@ -1,21 +1,23 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/9 下午7:30
+ * 最后编辑于: 2021/3/14 下午6:16
  */
 
 package org.mirai.plugin
 
 import com.mayabot.nlp.module.summary.KeywordSummary
 import com.mayabot.nlp.segment.Lexers.coreBuilder
-import com.mayabot.nlp.segment.Sentence
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.AutoSavePluginData
+import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -23,23 +25,24 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
-import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.globalEventChannel
-import net.mamoe.mirai.message.data.content
+import net.mamoe.mirai.event.subscribeGroupMessages
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import java.io.File
 import java.io.InputStream
+import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 
 
-data class Dynamic(val timestamp: Long?, val text: String?, val imageURL: InputStream?)
+data class Dynamic(val timestamp: Long?, val text: String?, val imageStream: InputStream?)
 
 @ConsoleExperimentalApi
 object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
-    private val LEXER = coreBuilder()
+    val LEXER = coreBuilder()
         .withPos() //词性标注功能
         .withPersonName() // 人名识别功能
 //        .withNer() // 命名实体识别
@@ -53,8 +56,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
     override fun onEnable() {
         MySetting.reload() // 从数据库自动读
         MyPluginData.reload()
-        CacheData.reload()
-//        MySetting.count++ // 对 Setting 的改动会自动在合适的时间保存
+
         CalculationExp.register()   // 经验计算器
         WikiAzurLane.register()     // 碧蓝Wiki
         Construction.register()     // 建造时间
@@ -69,9 +71,13 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Request.register()          // 加群操作
         Test.register()             // 测试
         AI.register()               // 图灵数据库增删改查
+        Tarot.register()            // 塔罗
+//        MyHelp.register()           // 帮助功能
+        CommandManager.registerCommand(MyHelp, true) // 帮助功能,需要覆盖内建指令
+
         // 动态更新
         PluginMain.launch {
-            val job1 = CronJob("动态更新")
+            val job1 = CronJob("动态更新", 120)
             job1.addJob {
                 for (list in MyPluginData.timeStampOfDynamic) {
                     val (i, j, k) = SendDynamic.getDynamic(list.key, flag = true)
@@ -102,7 +108,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         }
         // 报时
         PluginMain.launch {
-            val job2 = CronJob("报时")
+            val job2 = CronJob("报时", 3)
             job2.addJob {
                 val time = LocalDateTime.now().hour
                 val dbObject = SQLiteJDBC(resolveDataPath("AssetData.db"))
@@ -148,7 +154,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         }
         // 每日提醒
         PluginMain.launch {
-            val job3 = CronJob("每日提醒")
+            val job3 = CronJob("每日提醒", 3)
             job3.addJob {
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupList = dbObject.select("Policy", "DailyReminderMode", 0, 5)
@@ -200,6 +206,10 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             if (MyPluginData.groupIdList.contains(it.groupId)) {
                 it.accept()
                 MyPluginData.groupIdList.remove(it.groupId)
+                val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
+                dbObject.insert("Policy", arrayOf("group_id"), arrayOf("${it.groupId}"))
+                dbObject.insert("SubscribeInfo", arrayOf("group_id"), arrayOf("${it.groupId}"))
+                dbObject.closeDB()
                 PluginMain.logger.info { "PASS" }
             } else {
                 it.ignore()
@@ -207,55 +217,36 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
         }
 
+
         // 聊天触发
-        this.globalEventChannel().subscribeAlways<GroupMessageEvent>(priority = EventPriority.LOWEST) {
-            if (group.botMuteRemaining > 0) return@subscribeAlways
-            val den = MySetting.initiativeSayProbability["Denominator"]
-            val numerator = MySetting.initiativeSayProbability["numerator"]
-            if (den == null || numerator == null) {
-                PluginMain.logger.warning { "缺失配置项" }
-                return@subscribeAlways
+        this.globalEventChannel().subscribeGroupMessages(priority = EventPriority.LOWEST) {
+            atBot {
+//                if (group.botMuteRemaining > 0 || this.isIntercepted) return@atBot
+                val filterMessageList: List<Message> = message.filter { it !is At }
+                val filterMessageChain: MessageChain = filterMessageList.toMessageChain()
+                AI.dialogue(subject, filterMessageChain.content, true)
             }
-            if (!this.isIntercepted && (1..den).random() <= numerator) {
-                val wordList: Sentence = LEXER.scan(message.content)
-                val key = KEYWORD_SUMMARY.keyword(message.content, 1)
-                    .let { if (it.isEmpty()) return@subscribeAlways else it[0] }
 
-                val dbObject = SQLiteJDBC(resolveDataPath("AI.db"))
-                val rList = dbObject.select("Corpus", "keys", key, 0)
-                dbObject.closeDB()
-                val r = mutableListOf<String>()
-                var jaccardMax = 0.5
-                for (i in rList) {
-                    val formID = i["fromGroup"].toString().toLong()
-                    if (formID != subject.id && formID != 0L) continue
-                    val a = mutableListOf<String>()
-                    val b = mutableListOf<String>()
-                    val s = LEXER.scan(i["question"].toString())
-
-                    s.toList().forEach { a.add(it.toString()) }
-                    wordList.toList().forEach { b.add(it.toString()) }
-
-                    val jaccardIndex = (a intersect b).size.toDouble() / (a union b).size.toDouble()
-
-                    when {
-                        jaccardIndex > jaccardMax -> {
-                            jaccardMax = jaccardIndex
-                            r.clear()
-                            r.add(i["answer"] as String)
-                        }
-                        jaccardIndex == jaccardMax -> r.add(i["answer"] as String)
-                        jaccardIndex < jaccardMax -> continue
-                    }
+            atBot().not().invoke {
+                val den = MySetting.initiativeSayProbability["Denominator"]
+                val numerator = MySetting.initiativeSayProbability["numerator"]
+                if (den == null || numerator == null) {
+                    PluginMain.logger.warning { "缺失配置项" }
+                    return@invoke
                 }
-                if (r.size > 0) subject.sendMessage(r.random())
+                val v = (1..den).random() <= numerator
+//                PluginMain.logger.info { "不at执行这里,$v" }
+                if (v) AI.dialogue(subject, message.content)
             }
         }
 
+        PluginMain.launch { delay(5 * 1000); announcement("启动完成") }
         logger.info { "Hi: ${MySetting.name},启动完成" } // 输出一条日志.
     }
 
     override fun onDisable() {
+//        PluginMain.launch{ announcement("正在关闭") } // 关闭太快发不出来
+        sleep(3 * 1000)
         CalculationExp.unregister() // 经验计算器
         WikiAzurLane.unregister()   // 碧蓝Wiki
         Construction.unregister()   // 建造时间
@@ -269,9 +260,17 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         CrowdVerdict.unregister()   // 众裁
         SauceNAO.unregister()       // 搜图
         Request.unregister()        // 加群操作
-        AI.unregister()               // 图灵数据库增删改查
+        AI.unregister()             // 图灵数据库增删改查
+        Tarot.unregister()          // 塔罗
+        MyHelp.unregister()           // 帮助功能
         PluginMain.cancel()
     }
+
+    private suspend fun announcement(text: String) {
+        Bot.getInstance(MySetting.BotID).getGroup(MySetting.AnnouncementGroupID)
+            ?.sendMessage("Hi, ${MySetting.name}$text")
+    }
+
 }
 
 // 定义插件数据
@@ -299,7 +298,7 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
             3 to "舰队Collection-日文",
             5 to "明日方舟",
             2 to "舰队Collection-音频",
-            4 to "千恋*万花-音频(芳乃/茉子/丛雨/蕾娜)"
+            4 to "千恋*万花-音频(芳乃/茉子/丛雨/蕾娜)-音频"
         )
     )
     val groupIdList: MutableList<Long> by value(
@@ -316,16 +315,23 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
 //    val botToLongMap: MutableMap<Bot, Long> by value<MutableMap<Long, Long>>().mapKeys(Bot::getInstance, Bot::id)
 }
 
-object CacheData : AutoSavePluginData("TB_TemporaryData") { // "name" 是保存的文件名 (不带后缀)
-    val ActivatedList: MutableSet<Long> by value(mutableSetOf())
-}
-
-
 object MySetting : AutoSavePluginConfig("TB_Setting") {
+    @ValueDescription("名字")
     val name by value("领航员-TB")
+
+    @ValueDescription("Bot 账号")
     val BotID by value(123456L)
+
+    @ValueDescription("公告群群号")
+    val AnnouncementGroupID by value(123456L)
+
+    @ValueDescription("SauceNAO 的 API Key")
     val SauceNAOKey by value("你的Key")
+
+    @ValueDescription("超级管理员账号")
     val AdminID by value(123456L)
+
+    @ValueDescription("聊天触发概率,触发概率为 numerator / Denominator")
     val initiativeSayProbability: Map<String, Int> by value(mapOf("Denominator" to 3, "numerator" to 1)) // 支持 Map
 
 //    @ValueDescription("数量") // 注释写法, 将会保存在 MySetting.yml 文件中.
