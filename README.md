@@ -29,8 +29,7 @@
 * [X] 整点报时 - 舰C语音版本 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 众裁禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 塔罗占卜 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
-
-> 与设想功能有差距
+  > 与设想功能有差距
 
 | **说明** | **图标**                                                     |
 | -------: | :----------------------------------------------------------- |
