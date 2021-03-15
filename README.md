@@ -17,7 +17,7 @@
 * [X] 自助禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 基于`SauceNao`的搜图 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 智障聊天 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
-  > `@Me`检查尚未完成
+  > 个别句子处理有缺陷
 * [X] 半自动化同意入群邀请 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
   > 有源于Mirai本身的问题
 * [ ] 随机色图 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
@@ -28,7 +28,9 @@
 
 * [X] 整点报时 - 舰C语音版本 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 众裁禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
-* [ ] 塔罗占卜 ![`正在推进`](https://img.shields.io/badge/-Underway-blue)
+* [X] 塔罗占卜 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
+
+> 与设想功能有差距
 
 | **说明** | **图标**                                                     |
 | -------: | :----------------------------------------------------------- |

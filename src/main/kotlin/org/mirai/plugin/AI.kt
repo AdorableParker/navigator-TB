@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/3/15 下午7:09
  */
 
 package org.mirai.plugin
@@ -26,7 +26,8 @@ object AI : CompositeCommand(
             return
         }
         userDBObject.closeDB()
-        val keyWord = PluginMain.KEYWORD_SUMMARY.keyword(question, 1)[0]
+        val keyWordList = PluginMain.KEYWORD_SUMMARY.keyword(question, 1)
+        val keyWord = if (keyWordList.size <= 0) question else keyWordList[0]
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
         val entry = dbObject.select(
             "Corpus",
@@ -109,8 +110,7 @@ object AI : CompositeCommand(
     suspend fun dialogue(subject: Group, content: String, atMe: Boolean = false) {
         val wordList = PluginMain.LEXER.scan(content)
 //        PluginMain.logger.info{ "$content,$answer" }
-        val key = PluginMain.KEYWORD_SUMMARY.keyword(content, 1)
-            .let { if (it.isEmpty()) return else it[0] }
+        val key = PluginMain.KEYWORD_SUMMARY.keyword(content, 1).let { if (it.size <= 0) content else it[0] }
 //        PluginMain.logger.info { "pass" }
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
         val rList = if (key.isNullOrBlank()) {
