@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/3/15 下午7:10
  */
 
 package org.mirai.plugin
@@ -87,23 +87,25 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                         val groupList =
                             MyPluginData.nameOfDynamic[list.key]?.let { dbObject.select("SubscribeInfo", it, 1.0, 1) }
                         dbObject.closeDB()
-
                         if (groupList != null) {
+                            val img = k?.toExternalResource()
                             for (groupInfo in groupList) {
+//                                PluginMain.logger.info { "开始推送至群:${groupInfo["group_id"]}" }
                                 val groupID = groupInfo["group_id"] as Int
                                 val group = Bot.getInstance(MySetting.BotID).getGroup(groupID.toLong())
                                 if (group == null || group.botMuteRemaining > 0) {
                                     continue
                                 }
-                                k?.let { group.sendImage(it) }
-                                j?.let { group.sendMessage("$it\n发布时间:$time") }
+                                img?.let { group.sendImage(it) }
+                                j?.let { group.sendMessage(PlainText("$it\n发布时间:$time")) }
                             }
-                        }
-                        k?.use {} // 关闭资源
+                            img.use { } // PluginMain.logger.debug("关闭图片资源") }
+                        } else k?.use { }
                     }
                 }
 
             }
+//            job1.start(MyTime(0, 2))
             job1.start(MyTime(0, 6))
         }
         // 报时
