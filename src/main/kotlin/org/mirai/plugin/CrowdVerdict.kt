@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/7 上午9:51
+ * 最后编辑于: 2021/3/15 下午7:09
  */
 
 package org.mirai.plugin
@@ -46,7 +46,7 @@ object CrowdVerdict : SimpleCommand(
             return
         }
         if (voteUser.idList.indexOf(user.id) == -1) {
-            sendMessage("众裁人数+1,通过后,被裁决者将会被禁言${voteUser.poll(2, user.id)}分钟")
+            sendMessage("达成进度(${voteUser.idList.size}/10)\n通过后,被裁决者将会被禁言${voteUser.poll(2, user.id)}分钟")
         } else {
             sendMessage("你已经投过票了")
         }
@@ -91,12 +91,19 @@ object CrowdVerdict : SimpleCommand(
                 runCatching {
                     user.mute(vote * 30)
                 }.onSuccess {
-                    sendMessage("众裁人数+1,${nameB}加码,众裁通过后,被裁决者将会被禁言${voteUser.poll(vote, user.id)}分钟")
+                    sendMessage(
+                        "${nameB}加码,达成进度(${voteUser.idList.size}/10)\n众裁通过后,被裁决者将会被禁言${
+                            voteUser.poll(
+                                vote,
+                                user.id
+                            )
+                        }分钟"
+                    )
                 }.onFailure {
                     sendMessage("执行失败,请检查权限")
                 }
             } else {
-                sendMessage("众裁人数+1,通过后,被裁决者将会被禁言${voteUser.poll(vote, user.id)}分钟")
+                sendMessage("达成进度(${voteUser.idList.size}/10)\n通过后,被裁决者将会被禁言${voteUser.poll(vote, user.id)}分钟")
             }
         } else {
             sendMessage("你已经投过票了")
