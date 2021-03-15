@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/3/15 下午7:09
  */
 
 package org.mirai.plugin
@@ -12,7 +12,6 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import net.mamoe.mirai.utils.info
 import java.io.File
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -27,19 +26,20 @@ object Tarot : SimpleCommand(
 
     @Handler
     suspend fun MemberCommandSenderOnMessage.main() {
-        PluginMain.logger.info { "测试命令执行" }
+//        PluginMain.logger.info { "测试命令执行" }
         val today = LocalDateTime.now()
         var i = 1
         while (user.id / 10 * i <= 0) i *= 10
         val seeds = (today.year * 1000L + today.dayOfYear) * i + user.id
         val brand = listOf(
             "The Fool(愚者)",
-            "The Magician(魔术师)", "The High Priestess(女祭司)", "The Empress(女皇)", "The Emperor(皇帝)", "The Hierophant(教皇)",
+            "The Magician(魔术师)", "The High Priestess(女祭司)", "The Empress(女王)", "The Emperor(皇帝)", "The Hierophant(教皇)",
             "The Lovers(恋人)", "The Chariot(战车)", "Strength(力量)", "The Hermit(隐者)", "Wheel of Fortune(命运之轮)",
             "Justice(正义)", "The Hanged Man(倒吊人)", "Death(死神)", "Temperance(节制)", "The Devil(恶魔)",
             "The Tower(塔)", "The Star(星星)", "The Moon(月亮)", "The Sun(太阳)", "Judgement(审判)",
             "The World(世界)"
         ).random(Random(seeds))
+//        PluginMain.logger.info{brand}
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AssetData.db"))
         val r = dbObject.select("Tarot", "Brand", brand)[0]
         dbObject.closeDB()
