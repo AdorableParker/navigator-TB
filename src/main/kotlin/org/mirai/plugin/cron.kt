@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/3/23 下午10:26
  */
 
 package org.mirai.plugin
@@ -9,6 +9,7 @@ package org.mirai.plugin
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.utils.info
+import net.mamoe.mirai.utils.warning
 import java.time.LocalDateTime
 
 data class MyTime(var hours: Int, var minute: Int) {
@@ -48,10 +49,15 @@ class CronJob(private val jobExplain: String, private val calibration: Int) {
         delay(startTime)
         while (flag) {
             PluginMain.logger.info { "执行作业：$jobExplain" }
-            for (job in jobList) {
-                job()
+            kotlin.runCatching {
+                for (job in jobList) {
+                    job()
+                }
+            }.onSuccess {
+                PluginMain.logger.info { "$jobExplain 执行完毕" }
+            }.onFailure {
+                PluginMain.logger.warning { "$jobExplain 执行异常" }
             }
-            PluginMain.logger.info { "$jobExplain 执行完毕" }
             if (calibrationCountdown >= calibration) {
                 PluginMain.logger.info { "$jobExplain 执行校准" }
                 calibrationCountdown = 0
