@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/15 下午7:10
+ * 最后编辑于: 2021/3/23 下午10:28
  */
 
 package org.mirai.plugin
@@ -72,6 +72,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Test.register()             // 测试
         AI.register()               // 图灵数据库增删改查
         Tarot.register()            // 塔罗
+        Birthday.register()
 //        MyHelp.register()           // 帮助功能
         CommandManager.registerCommand(MyHelp, true) // 帮助功能,需要覆盖内建指令
 
@@ -163,12 +164,12 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 dbObject.closeDB()
                 val script = mapOf(
                     1 to arrayListOf(
-                        "Ciallo～(∠・ω< )⌒★今天是周一哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
-                        "Ciallo～(∠・ω< )⌒★今天是周二哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
-                        "Ciallo～(∠・ω< )⌒★今天是周三哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
-                        "Ciallo～(∠・ω< )⌒★今天是周四哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
-                        "Ciallo～(∠・ω< )⌒★今天是周五哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
-                        "Ciallo～(∠・ω< )⌒★今天是周六哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周一哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周二哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周三哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周四哦,今天开放的是「战术研修」「商船护送」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周五哦,今天开放的是「战术研修」「海域突进」，困难也记得打呢。",
+                        "Ciallo～(∠・ω< )⌒★今天是周六哦,今天开放的是「战术研修」「斩首行动」，困难也记得打呢。",
                         "Ciallo～(∠・ω< )⌒★今天是周日哦,每日全部模式开放，每周两次的破交作战记得打哦，困难模式也别忘了。"
                     ),
                     2 to arrayListOf(
@@ -265,6 +266,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         AI.unregister()             // 图灵数据库增删改查
         Tarot.unregister()          // 塔罗
         MyHelp.unregister()           // 帮助功能
+        Birthday.unregister()
         PluginMain.cancel()
     }
 
