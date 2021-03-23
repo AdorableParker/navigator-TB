@@ -30,8 +30,7 @@
   > 额外增加了`千恋*万花`的语音报时
 * [X] 众裁禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 塔罗占卜 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
-
-> 与设想功能有差距
+  > 与设想功能有差距
 
 ## 开发途中追加的功能
 
