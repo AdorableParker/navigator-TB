@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/3/23 下午10:28
  */
 
 package org.mirai.plugin
@@ -38,9 +38,9 @@ object Test : SimpleCommand(
         PluginMain.logger.info {
             "测试命令执行"
         }
-        val list = mutableSetOf<Long>()
-        bot.groups.forEach { list.add(it.id) }
-        PluginMain.logger.info { list.joinToString(",") }
+//        val list = mutableSetOf<Long>()
+//        bot.groups.forEach { list.add(it.id) }
+//        PluginMain.logger.info { list.joinToString(",") }
     }
 
     @Handler
