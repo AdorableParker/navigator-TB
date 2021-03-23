@@ -27,10 +27,15 @@
 ## 计划在本项目中实现的功能
 
 * [X] 整点报时 - 舰C语音版本 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
+  > 额外增加了`千恋*万花`的语音报时
 * [X] 众裁禁言 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 * [X] 塔罗占卜 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
 
 > 与设想功能有差距
+
+## 开发途中追加的功能
+
+* [X] 历史今日 - 军舰下水日期 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 
 | **说明** | **图标**                                                     |
 | -------: | :----------------------------------------------------------- |
