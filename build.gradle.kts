@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/9 下午7:10
+ * 最后编辑于: 2021/3/23 下午10:29
  */
 
-val miraiVersion = "2.5-M1" // Modify here
+val miraiVersion = "2.5-RC" // Modify here
 
 plugins {
-    val miraiVersion = "2.5-M1" // Modify here
+    val miraiVersion = "2.5-RC" // Modify here
 
     val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion
@@ -22,7 +22,7 @@ mirai {
 }
 
 group = "org.navigator-TB"
-version = "0.2.0"
+version = "0.3.2"
 
 repositories {
     maven("https://dl.bintray.com/him188moe/")
