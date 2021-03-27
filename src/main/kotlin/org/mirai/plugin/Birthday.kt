@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/23 下午10:28
+ * 最后编辑于: 2021/3/27 下午1:01
  */
 
 package org.mirai.plugin
@@ -22,6 +22,8 @@ object Birthday : SimpleCommand(
 
     @Handler
     suspend fun MemberCommandSenderOnMessage.main() {
+        if (group.botMuteRemaining > 0) return
+
 //        PluginMain.logger.info { "测试命令执行" }
         val today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M月dd日"))
 //        val today = "2月25日"
@@ -34,7 +36,7 @@ object Birthday : SimpleCommand(
         }
         for (i in r) {
             sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水")
-            sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水于$")
+//            sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水于$")
         }
 //        if ((0..100).random(Random(seeds)) >= 50) {
 //            File(PluginMain.resolveDataPath(r["uprightImg"].toString()).toString()).toExternalResource().use {

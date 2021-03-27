@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/23 下午10:28
+ * 最后编辑于: 2021/3/27 下午1:01
  */
 
 package org.mirai.plugin
@@ -42,12 +42,15 @@ data class Dynamic(val timestamp: Long?, val text: String?, val imageStream: Inp
 
 @ConsoleExperimentalApi
 object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
+
+    // 分词功能
     val LEXER = coreBuilder()
         .withPos() //词性标注功能
         .withPersonName() // 人名识别功能
 //        .withNer() // 命名实体识别
         .build()
 
+    // 关键词提取
     val KEYWORD_SUMMARY = KeywordSummary()
 
     //    KeywordSummary
@@ -224,13 +227,19 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         // 聊天触发
         this.globalEventChannel().subscribeGroupMessages(priority = EventPriority.LOWEST) {
             atBot {
+//                if(group.id != 704265877L){
+//                    group.sendMessage("功能施工中")
+//                    return@atBot
+//                }
 //                if (group.botMuteRemaining > 0 || this.isIntercepted) return@atBot
                 val filterMessageList: List<Message> = message.filter { it !is At }
                 val filterMessageChain: MessageChain = filterMessageList.toMessageChain()
-                AI.dialogue(subject, filterMessageChain.content, true)
+                AI.dialogue(subject, filterMessageChain.content.trim(), true)
             }
 
             atBot().not().invoke {
+//                if (group.id != 704265877L) return@invoke
+                if (group.botMuteRemaining > 0) return@invoke
                 val den = MySetting.initiativeSayProbability["Denominator"]
                 val numerator = MySetting.initiativeSayProbability["numerator"]
                 if (den == null || numerator == null) {
@@ -239,7 +248,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 }
                 val v = (1..den).random() <= numerator
 //                PluginMain.logger.info { "不at执行这里,$v" }
-                if (v) AI.dialogue(subject, message.content)
+                if (v) AI.dialogue(subject, message.content.trim())
             }
         }
 

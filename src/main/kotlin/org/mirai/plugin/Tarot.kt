@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/15 下午7:09
+ * 最后编辑于: 2021/3/27 下午1:01
  */
 
 package org.mirai.plugin
@@ -26,6 +26,8 @@ object Tarot : SimpleCommand(
 
     @Handler
     suspend fun MemberCommandSenderOnMessage.main() {
+        if (group.botMuteRemaining > 0) return
+
 //        PluginMain.logger.info { "测试命令执行" }
         val today = LocalDateTime.now()
         var i = 1

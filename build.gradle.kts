@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/23 下午10:29
+ * 最后编辑于: 2021/3/27 下午1:01
  */
 
-val miraiVersion = "2.5-RC" // Modify here
+val miraiVersion = "2.5.0" // Modify here
 
 plugins {
-    val miraiVersion = "2.5-RC" // Modify here
+    val miraiVersion = "2.5.0" // Modify here
 
     val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion

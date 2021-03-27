@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/15 下午7:09
+ * 最后编辑于: 2021/3/27 下午1:01
  */
 
 package org.mirai.plugin
@@ -26,8 +26,9 @@ object AI : CompositeCommand(
             return
         }
         userDBObject.closeDB()
-        val keyWordList = PluginMain.KEYWORD_SUMMARY.keyword(question, 1)
-        val keyWord = if (keyWordList.size <= 0) question else keyWordList[0]
+        val keyWord = PluginMain.KEYWORD_SUMMARY.keyword(question, 1).let { if (it.size <= 0) question else it[0] }
+//        PluginMain.logger.debug { "*$question*\n$keyWord" }
+
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
         val entry = dbObject.select(
             "Corpus",
@@ -108,15 +109,15 @@ object AI : CompositeCommand(
     }
 
     suspend fun dialogue(subject: Group, content: String, atMe: Boolean = false) {
+        val keyWord = PluginMain.KEYWORD_SUMMARY.keyword(content, 1).let { if (it.size <= 0) content else it[0] }
         val wordList = PluginMain.LEXER.scan(content)
-//        PluginMain.logger.info{ "$content,$answer" }
-        val key = PluginMain.KEYWORD_SUMMARY.keyword(content, 1).let { if (it.size <= 0) content else it[0] }
-//        PluginMain.logger.info { "pass" }
+//        PluginMain.logger.debug { "*$content*\n$keyWord" }
+
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
-        val rList = if (key.isNullOrBlank()) {
+        val rList = if (keyWord.isNullOrBlank()) {
             dbObject.select("Corpus", "answer", content, 0)
         } else {
-            dbObject.select("Corpus", "keys", key, 0)
+            dbObject.select("Corpus", "keys", keyWord, 0)
         }
         dbObject.closeDB()
         val r = mutableListOf<String>()
@@ -132,7 +133,6 @@ object AI : CompositeCommand(
             wordList.toList().forEach { b.add(it.toString()) }
 
             val jaccardIndex = (a intersect b).size.toDouble() / (a union b).size.toDouble()
-
             when {
                 jaccardIndex > jaccardMax -> {
                     jaccardMax = jaccardIndex
