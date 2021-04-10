@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/10 上午11:58
+ * 最后编辑于: 2021/4/10 下午12:00
  */
 
 package org.mirai.plugin
@@ -338,10 +338,7 @@ object MySetting : AutoSavePluginConfig("TB_Setting") {
     @ValueDescription("超级管理员账号")
     val AdminID by value(123456L)
 
-    @ValueDescription("聊天触发概率,触发概率为 numerator / Denominator")
-    val initiativeSayProbability: Map<String, Int> by value(mapOf("Denominator" to 3, "numerator" to 1)) // 支持 Map
-
-//    @ValueDescription("数量") // 注释写法, 将会保存在 MySetting.yml 文件中.
+    //    @ValueDescription("数量") // 注释写法, 将会保存在 MySetting.yml 文件中.
 //    var count by value(0)
 //    val nested by value<MyNestedData>() // 嵌套类型是支持的
 }

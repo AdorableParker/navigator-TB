@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/27 下午1:01
+ * 最后编辑于: 2021/4/10 下午12:00
  */
 
 package org.mirai.plugin
@@ -94,6 +94,29 @@ object AI : CompositeCommand(
         sendMessage(r)
     }
 
+    @SubCommand("EID查询")
+    suspend fun MemberCommandSenderOnMessage.eIDMain(EID: Int) {
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
+        val entryList =
+            dbObject.select("Corpus", "ID", EID, 1)
+        dbObject.closeDB()
+        val r = when {
+            entryList.isEmpty() -> "条目${EID}不存在"
+            else -> {
+                val report = mutableListOf("条目清单:")
+                for (row in entryList) {
+                    when (row["fromGroup"].toString().toLong()) {
+                        group.id -> report.add("问题:${row["question"]}\n回答:${row["answer"]}\n条目ID:${row["ID"]}\n控制权限:完全控制")
+                        0L -> report.add("问题:${row["question"]}\n回答:${row["answer"]}\n条目ID:${row["ID"]}\n控制权限:只读权限")
+                        else -> report.add("问题:隐藏\t回答:隐藏\n条目ID:${row["ID"]}\n控制权限:不可操作")
+                    }
+                }
+                report.joinToString("\n")
+            }
+        }
+        sendMessage(r)
+    }
+
     @SubCommand("删除")
     suspend fun MemberCommandSenderOnMessage.main(EID: Int) {
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
@@ -104,6 +127,20 @@ object AI : CompositeCommand(
                 sendMessage("问题:${row["question"]}\n回答:${row["answer"]}\n条目ID:${row["ID"]}\n条目已删除")
                 break
             } else sendMessage("该条目本群无权删除")
+        } else sendMessage("没有该条目")
+        dbObject.closeDB()
+    }
+
+    @SubCommand("sudo删除")
+    suspend fun MemberCommandSenderOnMessage.sudoMain(EID: Int) {
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AI.db"))
+        val entry = dbObject.select("Corpus", "ID", EID, 1)
+        if (entry.size > 0) for (row in entry) {
+            if (user.id == MySetting.AdminID) {
+                dbObject.delete("Corpus", "ID", "$EID")
+                sendMessage("问题:${row["question"]}\n回答:${row["answer"]}\n条目ID:${row["ID"]}\n条目已删除")
+                break
+            } else sendMessage("权限不足")
         } else sendMessage("没有该条目")
         dbObject.closeDB()
     }

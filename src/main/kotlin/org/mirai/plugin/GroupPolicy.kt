@@ -1,16 +1,17 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/4/10 下午12:00
  */
 
 package org.mirai.plugin
 
-import net.mamoe.mirai.console.command.*
+import net.mamoe.mirai.console.command.CommandManager
+import net.mamoe.mirai.console.command.CompositeCommand
+import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
-import net.mamoe.mirai.event.events.MessageEvent
 import org.mirai.plugin.MyPluginData.tellTimeMode
 
 @ConsoleExperimentalApi
@@ -174,44 +175,29 @@ object GroupPolicy : CompositeCommand(
         )
     }
 
-    @SubCommand("超级控制台")
-    suspend fun CommandSenderOnMessage<MessageEvent>.superConsole(func: String, groupID: Long, mode: Int) {
-        if (isUser() && user.id == MySetting.AdminID) {
-            val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
-            when (func) {
-                "1" -> dbObject.update("Policy", "group_id", groupID, "TellTimeMode", mode)
-                "2" -> {
-                    dbObject.update("SubscribeInfo", "group_id", groupID, "AzurLane", if (mode and 1 == 1) 1.0 else 0.0)
-                    dbObject.update(
-                        "SubscribeInfo",
-                        "group_id",
-                        groupID,
-                        "ArKnights",
-                        if (mode and 2 == 2) 1.0 else 0.0
-                    )
-                    dbObject.update(
-                        "SubscribeInfo",
-                        "group_id",
-                        groupID,
-                        "FateGrandOrder",
-                        if (mode and 4 == 4) 1.0 else 0.0
-                    )
-                    dbObject.update("SubscribeInfo", "group_id", groupID, "GenShin", if (mode and 8 == 8) 1.0 else 0.0)
-                }
-                "3" -> dbObject.update("Policy", "group_id", groupID, "DailyReminderMode", mode)
-                "4" -> dbObject.update("Policy", "group_id", groupID, "Teaching", mode)
-                else -> dbObject.update("Policy", "group_id", groupID, func, mode)
-            }
-            dbObject.closeDB()
-            sendMessage("OK")
-        } else {
+    @SubCommand("对话概率")
+    suspend fun MemberCommandSenderOnMessage.triggerProbability(value: Int) {
+        if (permissionCheck(user)) {
             sendMessage("权限不足")
+            return
         }
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
+        dbObject.update("Policy", "group_id", group.id, "TriggerProbability", value)
+        dbObject.closeDB()
+        sendMessage("对话概率调整到$value%")
     }
 
-    @SubCommand("超级控制台")
-    suspend fun CommandSenderOnMessage<MessageEvent>.superConsole() {
-        sendMessage("权限不足")
+    @SubCommand("对话概率")
+    suspend fun MemberCommandSenderOnMessage.triggerProbability() {
+        sendMessage(
+            """
+            无效模式参数，设定失败,请参考以下示范命令
+            群策略 对话概率 [概率值]
+            ——————————
+            概率值最高为100(必定触发),最低为0(绝不触发)
+            #若无可回答内容，任何情况下都不会触发
+            """.trimIndent()
+        )
     }
 
     private fun permissionCheck(user: Member): Boolean {
