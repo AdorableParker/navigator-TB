@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/27 下午1:01
+ * 最后编辑于: 2021/4/10 上午11:58
  */
 
 package org.mirai.plugin
@@ -25,8 +25,11 @@ object Birthday : SimpleCommand(
         if (group.botMuteRemaining > 0) return
 
 //        PluginMain.logger.info { "测试命令执行" }
-        val today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M月dd日"))
+        val today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M月d日"))
 //        val today = "2月25日"
+//        PluginMain.logger.debug {
+//            today
+//        }
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("AssetData.db"))
         val r = dbObject.select("ShipBirthday", "LaunchDay", today)
         dbObject.closeDB()
@@ -35,8 +38,11 @@ object Birthday : SimpleCommand(
             return
         }
         for (i in r) {
-            sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水")
-//            sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水于$")
+            if (i["Annotate"].toString().isBlank()) {
+                sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水于${i["Annotate"]}")
+            } else {
+                sendMessage("${i["LaunchYear"]}年的今天,${i["Nationality"]}${i["ShipType"]}${i["Name"]}下水")
+            }
         }
 //        if ((0..100).random(Random(seeds)) >= 50) {
 //            File(PluginMain.resolveDataPath(r["uprightImg"].toString()).toString()).toExternalResource().use {

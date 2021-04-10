@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/27 下午1:01
+ * 最后编辑于: 2021/4/10 上午11:58
  */
 
 package org.mirai.plugin
@@ -75,7 +75,8 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Test.register()             // 测试
         AI.register()               // 图灵数据库增删改查
         Tarot.register()            // 塔罗
-        Birthday.register()
+        Birthday.register()         // 舰船下水日
+        Music.register()            // 点歌姬
 //        MyHelp.register()           // 帮助功能
         CommandManager.registerCommand(MyHelp, true) // 帮助功能,需要覆盖内建指令
 
@@ -227,26 +228,18 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         // 聊天触发
         this.globalEventChannel().subscribeGroupMessages(priority = EventPriority.LOWEST) {
             atBot {
-//                if(group.id != 704265877L){
-//                    group.sendMessage("功能施工中")
-//                    return@atBot
-//                }
-//                if (group.botMuteRemaining > 0 || this.isIntercepted) return@atBot
                 val filterMessageList: List<Message> = message.filter { it !is At }
                 val filterMessageChain: MessageChain = filterMessageList.toMessageChain()
                 AI.dialogue(subject, filterMessageChain.content.trim(), true)
             }
 
             atBot().not().invoke {
-//                if (group.id != 704265877L) return@invoke
                 if (group.botMuteRemaining > 0) return@invoke
-                val den = MySetting.initiativeSayProbability["Denominator"]
-                val numerator = MySetting.initiativeSayProbability["numerator"]
-                if (den == null || numerator == null) {
-                    PluginMain.logger.warning { "缺失配置项" }
-                    return@invoke
-                }
-                val v = (1..den).random() <= numerator
+                val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
+                val groupInfo = dbObject.select("Policy", "group_id", group.id, 1)
+                dbObject.closeDB()
+                val numerator = groupInfo[0]["TriggerProbability"] as Int
+                val v = (1..100).random() <= numerator
 //                PluginMain.logger.info { "不at执行这里,$v" }
                 if (v) AI.dialogue(subject, message.content.trim())
             }
@@ -275,7 +268,8 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         AI.unregister()             // 图灵数据库增删改查
         Tarot.unregister()          // 塔罗
         MyHelp.unregister()           // 帮助功能
-        Birthday.unregister()
+        Birthday.unregister()       // 舰船下水日
+        Music.unregister()          // 点歌姬
         PluginMain.cancel()
     }
 
@@ -351,4 +345,3 @@ object MySetting : AutoSavePluginConfig("TB_Setting") {
 //    var count by value(0)
 //    val nested by value<MyNestedData>() // 嵌套类型是支持的
 }
-

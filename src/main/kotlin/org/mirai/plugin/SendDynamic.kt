@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/3/14 下午6:16
+ * 最后编辑于: 2021/4/10 上午11:58
  */
 
 package org.mirai.plugin
@@ -25,13 +25,13 @@ object SendDynamic : CompositeCommand(
     override val usage: String =
         "${CommandManager.commandPrefix}动态查询 <目标ID> [回溯条数]\n" +
             "目标ID列表：\n" +
-            "*1* 小加加,火星加,碧蓝公告\n" +
-            "*2* 阿米娅,方舟公告,罗德岛线报\n" +
-            "*3* 呆毛王,FGO公告,月球人公告\n" +
-            "*4* 派蒙,原神公告,冒险家情报\n" +
+            "*1* 小加加,碧蓝公告\n" +
+            "*2* 阿米娅,方舟公告\n" +
+            "*3* 呆毛王,FGO公告\n" +
+            "*4* 派蒙,原神公告\n" +
             "*5* UID,其他"
 
-    @SubCommand("小加加", "火星加", "碧蓝公告")
+    @SubCommand("小加加", "碧蓝公告")
     suspend fun MemberCommandSenderOnMessage.azurLane() {
         val (timeStamp, text, images) = getDynamic(233114659)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -41,7 +41,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("小加加", "火星加", "碧蓝公告")
+    @SubCommand("小加加", "碧蓝公告")
     suspend fun MemberCommandSenderOnMessage.azurLane(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -59,7 +59,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("阿米娅", "方舟公告", "罗德岛线报")
+    @SubCommand("阿米娅", "方舟公告")
     suspend fun MemberCommandSenderOnMessage.arKnights() {
         val (timeStamp, text, images) = getDynamic(161775300)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -69,7 +69,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("阿米娅", "方舟公告", "罗德岛线报")
+    @SubCommand("阿米娅", "方舟公告")
     suspend fun MemberCommandSenderOnMessage.arKnights(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -86,7 +86,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("呆毛王", "FGO公告", "月球人公告")
+    @SubCommand("呆毛王", "FGO公告")
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder() {
         val (timeStamp, text, images) = getDynamic(233108841)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -96,7 +96,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("呆毛王", "FGO公告", "月球人公告")
+    @SubCommand("呆毛王", "FGO公告")
     suspend fun MemberCommandSenderOnMessage.fateGrandOrder(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
@@ -113,7 +113,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("派蒙", "原神公告", "冒险家情报")
+    @SubCommand("派蒙", "原神公告")
     suspend fun MemberCommandSenderOnMessage.genShin() {
         val (timeStamp, text, images) = getDynamic(401742377)
         val time = SimpleDateFormat("YY-MM-dd HH:mm").format(timeStamp)
@@ -121,7 +121,7 @@ object SendDynamic : CompositeCommand(
         text?.let { sendMessage("$it\n发布时间:$time") }
     }
 
-    @SubCommand("派蒙", "原神公告", "冒险家情报")
+    @SubCommand("派蒙", "原神公告")
     suspend fun MemberCommandSenderOnMessage.genShin(index: Int) {
         if (index >= 10) {
             sendMessage("最多只能往前10条哦\n的(￣﹃￣)")
