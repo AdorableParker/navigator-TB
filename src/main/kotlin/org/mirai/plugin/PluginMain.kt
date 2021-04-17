@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/10 下午12:00
+ * 最后编辑于: 2021/4/17 下午3:14
  */
 
 package org.mirai.plugin
@@ -232,9 +232,13 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
                 val filterMessageChain: MessageChain = filterMessageList.toMessageChain()
                 AI.dialogue(subject, filterMessageChain.content.trim(), true)
             }
-
             atBot().not().invoke {
                 if (group.botMuteRemaining > 0) return@invoke
+
+//                if (message.contains(PokeMessage)){
+//                    subject.sendMessage(PokeMessage.ChuoYiChuo)
+//                }
+
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupInfo = dbObject.select("Policy", "group_id", group.id, 1)
                 dbObject.closeDB()

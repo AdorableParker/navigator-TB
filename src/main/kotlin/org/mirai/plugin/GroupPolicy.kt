@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/10 下午12:00
+ * 最后编辑于: 2021/4/17 下午3:14
  */
 
 package org.mirai.plugin
@@ -26,6 +26,7 @@ object GroupPolicy : CompositeCommand(
         *2* 订阅模式
         *3* 每日提醒模式
         *4* 教学许可
+        *5* 对话概率
         """.trimIndent()
 
     @SubCommand("报时模式")
@@ -184,7 +185,7 @@ object GroupPolicy : CompositeCommand(
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
         dbObject.update("Policy", "group_id", group.id, "TriggerProbability", value)
         dbObject.closeDB()
-        sendMessage("对话概率调整到$value%")
+        sendMessage("本群对话概率调整到$value%")
     }
 
     @SubCommand("对话概率")

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/10 上午11:58
+ * 最后编辑于: 2021/4/17 下午3:14
  */
 
 package org.mirai.plugin
@@ -86,8 +86,9 @@ object Music : SimpleCommand(
         )
     }
 
+    @Suppress("UNREACHABLE_CODE") // Mark： 有无法到达的代码
     private fun getQQMusicCard(musicName: String): Message {
-        return PlainText("这个引擎还没做好")
+        return PlainText("你搜索的内容是“$musicName”，但是这个引擎还没做好")
         val doc = Jsoup.connect("https://c.y.qq.com/soso/fcgi-bin/client_search_cp?format=json&w=$musicName")
             .ignoreContentType(true)
             .execute().body().toString()
