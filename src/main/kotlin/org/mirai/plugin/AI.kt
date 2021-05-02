@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午6:05
  */
 
 package org.mirai.plugin
@@ -10,7 +10,9 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object AI : CompositeCommand(
     PluginMain, "AI",

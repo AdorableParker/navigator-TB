@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/5/2 下午1:55
+ * 最后编辑于: 2021/5/2 下午6:05
  */
 
 package org.mirai.plugin
@@ -25,6 +25,7 @@ import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
 import net.mamoe.mirai.event.events.BotLeaveEvent
+import net.mamoe.mirai.event.events.NudgeEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.*
@@ -244,6 +245,17 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             dbObject.closeDB()
             PluginMain.logger.warning { "###\n事件—被移出群:\n- 群ID：${it.groupId}\n- 相关群负责人：${pR["principal_ID"]}\n###" }
         }
+//        BotNudgedEvent
+        this.globalEventChannel().subscribeAlways<NudgeEvent> {
+            if (this.target == bot && this.from != bot) {
+                if ((1..5).random() <= 4) {
+                    subject.sendMessage(arrayOf("指挥官，请不要做出这种行为", "这只是全息交互界面", "指挥官，请专心于工作", "全息投影是不会被接触到的").random())
+                } else {
+                    this.from.nudge().sendTo(subject)
+                    subject.sendMessage("戳回去")
+                }
+            }
+        }
 
         // 聊天触发
         this.globalEventChannel().subscribeGroupMessages(priority = EventPriority.LOWEST) {
@@ -256,11 +268,6 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
             atBot().not().invoke {
                 if (group.botMuteRemaining > 0) return@invoke
-
-//                if (message.contains(PokeMessage)){
-//                    subject.sendMessage(PokeMessage.ChuoYiChuo)
-//                }
-
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 val groupInfo = dbObject.select("Policy", "group_id", group.id, 1)
                 dbObject.closeDB()

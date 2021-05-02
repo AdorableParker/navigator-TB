@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/5/2 下午2:36
+ * 最后编辑于: 2021/5/2 下午6:05
  */
 
 package org.mirai.plugin
@@ -213,6 +213,7 @@ object GroupPolicy : CompositeCommand(
 
     @SubCommand("责任人绑定")
     suspend fun MemberCommandSenderOnMessage.bindingOwnership(string: String) {
+        if (group.botMuteRemaining > 0) return
         val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
         val rpl = dbObject.selectOne("Responsible", "group_id", group.id, 1)
         val nowPR = rpl["principal_ID"].toString().toLong()
