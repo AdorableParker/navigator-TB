@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
@@ -9,7 +9,6 @@ package org.mirai.plugin
 import com.mayabot.nlp.module.summary.KeywordSummary
 import com.mayabot.nlp.segment.Lexers.coreBuilder
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.command.CommandManager
@@ -25,10 +24,12 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent
+import net.mamoe.mirai.event.events.BotLeaveEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import java.io.File
@@ -40,6 +41,7 @@ import java.time.LocalDateTime
 
 data class Dynamic(val timestamp: Long?, val text: String?, val imageStream: InputStream?)
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
 
@@ -77,6 +79,7 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Tarot.register()            // 塔罗
         Birthday.register()         // 舰船下水日
         Music.register()            // 点歌姬
+        AssetDataAccess.register()  // 资源数据库处理
 //        MyHelp.register()           // 帮助功能
         CommandManager.registerCommand(MyHelp, true) // 帮助功能,需要覆盖内建指令
 
@@ -212,10 +215,18 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             PluginMain.logger.info { "\nGroupName:${it.groupName}\nGroupID：${it.groupId}\nList:${MyPluginData.groupIdList}" }
             if (MyPluginData.groupIdList.contains(it.groupId)) {
                 it.accept()
-                MyPluginData.groupIdList.remove(it.groupId)
                 val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
                 dbObject.insert("Policy", arrayOf("group_id"), arrayOf("${it.groupId}"))
                 dbObject.insert("SubscribeInfo", arrayOf("group_id"), arrayOf("${it.groupId}"))
+                dbObject.insert(
+                    "Responsible", arrayOf("group_id", "principal_ID"), arrayOf(
+                        "${it.groupId}", "${
+                            MyPluginData.groupIdList.remove(
+                                it.groupId
+                            )
+                        }"
+                    )
+                )
                 dbObject.closeDB()
                 PluginMain.logger.info { "PASS" }
             } else {
@@ -224,10 +235,21 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
         }
 
+        // 退群处理
+        this.globalEventChannel().subscribeAlways<BotLeaveEvent.Kick> {
+            val dbObject = SQLiteJDBC(resolveDataPath("User.db"))
+            val pR = dbObject.selectOne("Responsible", "group_id", it.groupId, 1)
+            dbObject.delete("Policy", "group_id", it.groupId.toString())
+            dbObject.delete("SubscribeInfo", "group_id", it.groupId.toString())
+            dbObject.closeDB()
+            PluginMain.logger.warning { "###\n事件—被移出群:\n- 群ID：${it.groupId}\n- 相关群负责人：${pR["principal_ID"]}\n###" }
+        }
 
         // 聊天触发
         this.globalEventChannel().subscribeGroupMessages(priority = EventPriority.LOWEST) {
             atBot {
+                if (group.botMuteRemaining > 0) return@atBot
+
                 val filterMessageList: List<Message> = message.filter { it !is At }
                 val filterMessageChain: MessageChain = filterMessageList.toMessageChain()
                 AI.dialogue(subject, filterMessageChain.content.trim(), true)
@@ -249,7 +271,6 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
             }
         }
 
-        PluginMain.launch { delay(5 * 1000); announcement("启动完成") }
         logger.info { "Hi: ${MySetting.name},启动完成" } // 输出一条日志.
     }
 
@@ -276,12 +297,6 @@ object PluginMain : KotlinPlugin(JvmPluginDescription.loadFromResource()) {
         Music.unregister()          // 点歌姬
         PluginMain.cancel()
     }
-
-    private suspend fun announcement(text: String) {
-        Bot.getInstance(MySetting.BotID).getGroup(MySetting.AnnouncementGroupID)
-            ?.sendMessage("Hi, ${MySetting.name}$text")
-    }
-
 }
 
 // 定义插件数据
@@ -312,8 +327,8 @@ object MyPluginData : AutoSavePluginData("TB_Data") { // "name" 是保存的文�
             4 to "千恋*万花-音频(芳乃/茉子/丛雨/蕾娜)-音频"
         )
     )
-    val groupIdList: MutableList<Long> by value(
-        mutableListOf()
+    val groupIdList: MutableMap<Long, Long> by value(
+        mutableMapOf()
     )
 //    var long: Long by value(0L) // 允许 var
 //    var int by value(0) // 可以使用类型推断, 但更推荐使用 `var long: Long by value(0)` 这种定义方式.
@@ -333,11 +348,11 @@ object MySetting : AutoSavePluginConfig("TB_Setting") {
     @ValueDescription("Bot 账号")
     val BotID by value(123456L)
 
-    @ValueDescription("公告群群号")
-    val AnnouncementGroupID by value(123456L)
+//    @ValueDescription("公告群群号")
+//    val AnnouncementGroupID by value(123456L)
 
     @ValueDescription("SauceNAO 的 API Key")
-    val SauceNAOKey by value("你的Key")
+    val SauceNAOKey by value("")
 
     @ValueDescription("超级管理员账号")
     val AdminID by value(123456L)

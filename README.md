@@ -33,7 +33,9 @@
   > 与设想功能有差距
 
 ## 开发途中追加的功能
-
+* [X] 点歌姬 ![`不完美`](https://img.shields.io/badge/-NotPerfect-purple)
+  > 已实现网易云音乐平台的歌曲资源搜索推送
+  >> 原计划添加QQ音乐和咪咕音乐，但是懒得动了
 * [X] 历史今日 - 军舰下水日期 ![`已完成`](https://img.shields.io/badge/_Achieved-green)
 
 | **说明** | **图标**                                                     |

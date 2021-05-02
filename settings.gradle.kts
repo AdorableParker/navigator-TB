@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 pluginManagement {
@@ -13,4 +13,4 @@ pluginManagement {
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 }
-rootProject.name = "mirai-console-plugin-template"
+rootProject.name = "mirai-console-plugin-TB"

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
@@ -10,11 +10,13 @@ import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
 import kotlin.math.PI
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object Calculator : SimpleCommand(
     PluginMain, "Calculator", "计算器", "计算",

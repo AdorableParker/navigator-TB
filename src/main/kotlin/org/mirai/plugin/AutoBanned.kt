@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
@@ -11,7 +11,9 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object AutoBanned : SimpleCommand(
     PluginMain, "AutoBanned", "自助禁言", "睡眠套餐",

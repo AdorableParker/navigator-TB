@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
@@ -12,8 +12,11 @@ import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
+import net.mamoe.mirai.message.data.At
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 import org.mirai.plugin.MyPluginData.tellTimeMode
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object GroupPolicy : CompositeCommand(
     PluginMain, "GroupPolicy", "群策略",
@@ -27,6 +30,7 @@ object GroupPolicy : CompositeCommand(
         *3* 每日提醒模式
         *4* 教学许可
         *5* 对话概率
+        *6* 责任人绑定
         """.trimIndent()
 
     @SubCommand("报时模式")
@@ -203,5 +207,46 @@ object GroupPolicy : CompositeCommand(
 
     private fun permissionCheck(user: Member): Boolean {
         return user.permission.isOperator().not()
+    }
+
+
+    @SubCommand("责任人绑定")
+    suspend fun MemberCommandSenderOnMessage.bindingOwnership(string: String) {
+        val dbObject = SQLiteJDBC(PluginMain.resolveDataPath("User.db"))
+        val rpl = dbObject.selectOne("Responsible", "group_id", group.id, 1)
+        val nowPR = rpl["principal_ID"].toString().toLong()
+        when (string) {
+            "解绑" -> {
+                if (nowPR == user.id) {
+                    dbObject.update("Responsible", "group_id", "${group.id}", "principal_ID", 0)
+                    sendMessage("本群责任人解绑完成,请尽快绑定相关责任人,防止出现使用问题")
+                } else {
+                    sendMessage("你不是本群责任人,无法解绑")
+                }
+            }
+            "绑定" -> {
+                if (nowPR == 0L) {
+                    dbObject.update("Responsible", "group_id", "${group.id}", "principal_ID", user.id)
+                    sendMessage("本群责任人绑定完成\nGroup ID:${group.id}\tPrincipal ID: ${user.id}")
+                } else {
+                    sendMessage("本群已有责任人:" + At(nowPR) + "\n原责任人解绑后方可绑定")
+                }
+            }
+            else -> bindingOwnership()
+        }
+    }
+
+
+    @SubCommand("责任人绑定")
+    suspend fun MemberCommandSenderOnMessage.bindingOwnership() {
+        sendMessage(
+            """
+            无效参数，设定失败,请参考以下示范命令
+            群责任人绑定 [绑定|解绑]
+            ——————————
+            绑定责任人用于认定当前群的Bot使用权限最高归属人
+            !!若因未绑定而导致后期BOt使用管控问题,后果自负...(相关自助功能使用将会受限,也将维权繁琐)
+            """.trimIndent()
+        )
     }
 }

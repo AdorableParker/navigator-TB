@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
@@ -11,6 +11,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.nameCardOrNick
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 import net.mamoe.mirai.utils.info
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -23,6 +24,7 @@ data class VoteUser(var vote: Int = 0, val idList: MutableList<Long> = mutableLi
     }
 }
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 object CrowdVerdict : SimpleCommand(
     PluginMain, "CrowdVerdict", "众裁",

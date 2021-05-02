@@ -1,12 +1,13 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/4/17 下午3:14
+ * 最后编辑于: 2021/5/2 下午1:55
  */
 
 package org.mirai.plugin
 
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.utils.MiraiExperimentalApi
 import net.mamoe.mirai.utils.debug
 import net.mamoe.mirai.utils.warning
 import java.nio.file.Path
@@ -14,10 +15,10 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.Statement
-import java.util.*
 import kotlin.system.exitProcess
 
 
+@MiraiExperimentalApi
 @ConsoleExperimentalApi
 class SQLiteJDBC(DbPath: Path) {
     private var c: Connection? = null
@@ -51,8 +52,8 @@ class SQLiteJDBC(DbPath: Path) {
      */
     fun insert(table: String, column: Array<String>, value: Array<String>) {
         val sql = "INSERT INTO $table " +
-                "${column.joinToString(",", "(", ")")} VALUES " +
-                "${value.joinToString(",", "(", ")")};"
+            "${column.joinToString(",", "(", ")")} VALUES " +
+            "${value.joinToString(",", "(", ")")};"
         PluginMain.logger.debug { sql }
         if (executeSQL(sql) < 0) {
             PluginMain.logger.warning { "执行SQL插入操作异常" }
@@ -108,6 +109,46 @@ class SQLiteJDBC(DbPath: Path) {
         if (executeSQL(sql) < 0) {
             PluginMain.logger.warning { "执行SQL删除操作异常" }
         }
+    }
+
+    /**
+     * 单条返回操作
+     */
+    fun selectOne(
+        table: String,  // 目标表名
+        column: String,  // 限制字段
+        value: Any,  // 限制值
+        mods: Int = 0
+    ): MutableMap<String?, Any?> {
+        val row: MutableMap<String?, Any?> = mutableMapOf()
+        val sql: String = when (mods) {
+            1 -> "SELECT * FROM $table WHERE $column = $value;"
+            2 -> "SELECT * FROM $table WHERE $column GLOB '*$value';"
+            3 -> "SELECT * FROM $table WHERE $column GLOB '$value*';"
+            4 -> "SELECT * FROM $table WHERE $column GLOB '*$value*';"
+            5 -> "SELECT * FROM $table WHERE $column != $value;"
+            else -> "SELECT * FROM $table WHERE $column = '$value';"
+        }
+        try {
+            stmt = c?.createStatement()
+            val rs: ResultSet? =
+                stmt?.executeQuery(sql)
+            if (rs != null) {
+                val metadata = rs.metaData
+                val columnCount = metadata.columnCount
+                while (rs.next()) {
+                    for (i in 1..columnCount) {
+                        row[metadata.getColumnName(i)] = rs.getObject(i)
+                    }
+                }
+                rs.close()
+            }
+            stmt?.close()
+        } catch (e: java.lang.Exception) {
+            PluginMain.logger.warning { e.javaClass.name + ": " + e.message }
+            exitProcess(0)
+        }
+        return row
     }
 
     /**
