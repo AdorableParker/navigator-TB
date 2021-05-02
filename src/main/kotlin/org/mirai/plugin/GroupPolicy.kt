@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2021.
  * 作者: AdorableParker
- * 最后编辑于: 2021/5/2 下午1:55
+ * 最后编辑于: 2021/5/2 下午2:36
  */
 
 package org.mirai.plugin
@@ -13,6 +13,7 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.message.data.At
+import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.utils.MiraiExperimentalApi
 import org.mirai.plugin.MyPluginData.tellTimeMode
 
@@ -229,11 +230,12 @@ object GroupPolicy : CompositeCommand(
                     dbObject.update("Responsible", "group_id", "${group.id}", "principal_ID", user.id)
                     sendMessage("本群责任人绑定完成\nGroup ID:${group.id}\tPrincipal ID: ${user.id}")
                 } else {
-                    sendMessage("本群已有责任人:" + At(nowPR) + "\n原责任人解绑后方可绑定")
+                    sendMessage(PlainText("本群已有责任人:") + At(nowPR) + PlainText("\n原责任人解绑后方可绑定"))
                 }
             }
             else -> bindingOwnership()
         }
+        dbObject.closeDB()
     }
 
 
