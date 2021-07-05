@@ -1,6 +1,6 @@
-# 自用QQ机器人的Mirai平台版本![(Beta)](https://img.shields.io/badge/_Beta-gray)
+# 自用QQ机器人的Mirai平台版本![(Beta)](https://img.shields.io/badge/_Beta-gray)【[`暂停更新`][nymph]】
 
-从[`Ikaros_Golang`](https://github.com/AdorableParker/Ikaros_Golang) 迁移过来，不出意外的话大部分功能都将重构实现
+从[`Ikaros_Golang`][Ikaros_Golang] 迁移过来，不出意外的话大部分功能都将重构实现
 
 ## 原项目已有功能
 
@@ -46,3 +46,7 @@
 | 暂时搁置 | ![`暂时搁置`](https://img.shields.io/badge/-Shelved-yellow)  |
 |   未测试 | ![`未测试`](https://img.shields.io/badge/-NotTested-red)     |
 | 不会实现 | ![`不会实现`](https://img.shields.io/badge/-Invalid-inactive) |
+
+
+[nymph]: https://github.com/AdorableParker/nymph "项目模板更换"
+[Ikaros_Golang]:https://github.com/AdorableParker/Ikaros_Golang
