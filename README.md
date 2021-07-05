@@ -1,4 +1,4 @@
-# 自用QQ机器人的Mirai平台版本![(Beta)](https://img.shields.io/badge/_Beta-gray)【[`暂停更新`][nymph]】
+# 自用QQ机器人的Mirai平台版本![(Beta)](https://img.shields.io/badge/_Beta-gray)【[`此库停止更新`][nymph]】
 
 从[`Ikaros_Golang`][Ikaros_Golang] 迁移过来，不出意外的话大部分功能都将重构实现
 
